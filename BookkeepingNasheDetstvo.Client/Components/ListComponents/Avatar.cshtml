@@ -1,0 +1,12 @@
+﻿@if (!string.IsNullOrEmpty(AvatarUrl))
+{
+    <div class="w3-quarter w3-mobile w3-padding-small w3-margin-top w3-center">
+        <img src="@AvatarUrl" class="w3-image" style="width:100%;max-width:250px" alt="Image" />
+    </div>
+    <Separator />
+}
+
+@functions {
+    [Parameter]
+    string AvatarUrl { get; set; }
+}
