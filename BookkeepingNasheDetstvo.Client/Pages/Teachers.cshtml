@@ -1,0 +1,50 @@
+﻿@layout __Layout
+@page "/teachers"
+@inherits BaseComponent
+
+<ButtonComponent Color="blue" Text="Добавить преподавателя" Click=@(() => UriHelper.NavigateTo("/teacher")) />
+
+@if (_teachers == null)
+{
+    if (IsOk)
+    {
+        <Loading />
+    }
+    else
+    {
+        <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
+    }
+}
+else if (_teachers.Count == 0)
+{
+    <p>Преподавателей пока что нет.</p>
+}
+else
+{
+    <AvatarList Models=@_models UriHelper=@UriHelper />
+}
+
+@functions {
+    List<AvatarItemModel> _models;
+    
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        await LoadCurrent();
+        
+        var teachers = await Get<List<T>>("/api/teachers");
+
+        if (teachers == default)
+        {
+            IsOk = false;
+            foreach (var teacher in teachers)
+                _models.Add(new AvatarItemModel
+                {
+                    AvatarUrl = teacher.ImageUrl,
+                    Title = $"{teacher.LastName} {teacher.FirstName}".Trim(),
+                    ViewUrl = $"/teacher/{teacher.Id}"
+                });
+        }
+        else IsOk = true;
+    }
+}
