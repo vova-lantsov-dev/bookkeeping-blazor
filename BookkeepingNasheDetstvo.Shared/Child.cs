@@ -16,5 +16,6 @@ namespace BookkeepingNasheDetstvo.Shared
         public string MotherName { get; set; }
         public string MotherPhone { get; set; }
         [BsonSerializer(typeof(CustomMongoDecimalSerializer))] public decimal PerHour { get; set; }
+        [BsonSerializer(typeof(CustomMongoDecimalSerializer))] public decimal PerHourGroup { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace BookkeepingNasheDetstvo.Shared
     {
         [BsonRepresentation(BsonType.ObjectId)] public string Id { get; set; }
         [BsonSerializer(typeof(CustomMongoDecimalSerializer))] public decimal PerHour { get; set; }
+        [BsonSerializer(typeof(CustomMongoDecimalSerializer))] public decimal PerHourGroup { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string SecondName { get; set; }
