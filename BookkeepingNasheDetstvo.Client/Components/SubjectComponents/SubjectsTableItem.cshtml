@@ -1,0 +1,124 @@
+﻿@inherits BaseComponent
+
+<td>
+    <div class="w3-container">
+        @if (Write)
+        {
+            if (Currents.Any())
+            {
+                foreach (var current in Currents)
+                {
+                    <div class="w3-container" style="white-space:nowrap" onclick=@Reverse>
+                        <label>@current.Name</label>
+                        <button class="w3-button w3-red w3-hover-white w3-text-white w3-hover-text-red w3-border w3-border-red w3-tiny w3-padding-small" onclick=@(() => ChildRemoved(current.Id))>x</button>
+                    </div>
+                }
+            }
+            else if (!_edit)
+            {
+                <div class="w3-container" onclick=@Reverse>
+                    <label class="w3-large">—</label>
+                </div>
+            }
+        }
+        else
+        {
+            if (Currents.Any())
+            {
+                foreach (var current in Currents)
+                {
+                <div class="w3-container" style="white-space:nowrap">
+                    <label>@current.Name</label>
+                    @*<button class="w3-button w3-red w3-hover-white w3-text-white w3-hover-text-red w3-border w3-border-red w3-tiny w3-padding-small" onclick=@(() => ChildRemoved(current.Id))>x</button>-->*@
+                </div>
+                }
+            }
+            else
+            {
+                <div class="w3-container">
+                    <label class="w3-large">—</label>
+                </div>
+            }
+        }
+        @if (_edit)
+        {
+            <select onchange=@SelectionChanged>
+                <option selected disabled hidden>Выберите ребёнка</option>
+                @foreach (var option in AllChildren.Where(c => !Currents.Contains(c)))
+                {
+                    <option value="@option.Id">@option.Name</option>
+                }
+            </select>
+        }
+    </div>
+</td>
+
+@functions {
+    bool _edit = false;
+
+    [Parameter]
+    List<Shared.IdNamePair> Currents { get; set; }
+
+    [Parameter]
+    List<Shared.IdNamePair> AllChildren { get; set; }
+
+    [Parameter]
+    bool Write { get; set; }
+
+    [Parameter]
+    Shared.IdNamePair Owner { get; set; }
+    [Parameter]
+    string Date { get; set; }
+    [Parameter]
+    string Time { get; set; }
+
+    void Reverse()
+    {
+        if (Write) _edit = !_edit;
+    }
+
+    void SelectionChanged(UIChangeEventArgs args)
+    {
+        _edit = false;
+        if (args.Value is string value && !string.IsNullOrEmpty(value))
+        {
+            ChildAdded(AllChildren.First(c => c.Id == value));
+        }
+    }
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+    }
+
+    async void ChildAdded(Shared.IdNamePair child)
+    {
+        if (await Post("/api/subject/addChild", new Shared.AddChildAction
+        {
+            Owner = Owner,
+            Child = child,
+            Date = Date,
+            Time = Time
+        }))
+        {
+            Currents.Add(child);
+            StateHasChanged();
+        }
+    }
+
+    async void ChildRemoved(string id)
+    {
+        _edit = false;
+        if (await Post("/api/subject/removeChild", new Shared.RemoveChildAction
+        {
+            OwnerId = Owner.Id,
+            ChildId = id,
+            Date = Date,
+            Time = Time
+        }))
+        {
+            Currents.RemoveAll(c => c.Id == id);
+            StateHasChanged();
+        }
+    }
+}
