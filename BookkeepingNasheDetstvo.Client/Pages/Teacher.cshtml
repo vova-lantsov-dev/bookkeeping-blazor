@@ -1,0 +1,60 @@
+﻿@layout __Layout
+@page "/teacher"
+@page "/teacher/{Id}"
+@inherits BaseComponent
+
+@if (_teacher == null)
+{
+    if (IsOk)
+    {
+        <Loading />
+    }
+    else
+    {
+        <Action Text="Преподаватель с таким идентификатором не найден в базе данных." ButtonAction=@(() => UriHelper.NavigateTo("/teachers")) />
+    }
+}
+else
+{
+    <Avatar AvatarUrl=@_teacher.ImageUrl />
+    if (Current?.EditTeachers ?? false)
+    {
+        <TeacherInputs Base="teacher" Teacher=@_teacher ReadStatistic=@(Current?.ReadGlobalStatistics ?? false) />
+    }
+    else
+    {
+        <TeacherReadOnly Teacher=@_teacher ReadStatistic=@(Current?.ReadGlobalStatistics ?? false) />
+    }
+}
+@functions {
+T _teacher;
+[Parameter]
+string Id { get; set; }
+
+protected override async Task OnInitAsync()
+{
+    await CheckAccessToken();
+    await LoadCurrent();
+    _teacher = !string.IsNullOrEmpty(Id)
+        ? await Get<T>($"/api/teacher/{Id}")
+        : new T
+        {
+            PerHour = "0",
+            Additional = "",
+            Additional2 = "",
+            Email = "",
+            FirstName = "",
+            ImageUrl = "",
+            LastName = "",
+            PasswordHash = "",
+            PhoneNumber = "+380",
+            ReadGlobalStatistics = false,
+            SecondName = "",
+            EditChildren = false,
+            EditTeachers = false,
+            EditSubjects = false
+        };
+
+    IsOk = _teacher != default;
+}
+}
