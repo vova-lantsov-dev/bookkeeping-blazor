@@ -1,0 +1,92 @@
+﻿@inherits SubmitComponentBase
+
+<div class="w3-rest w3-mobile">
+    <div class="w3-container w3-padding">
+        <InputLabelComponent Label="Фамилия" Value="@Child.LastName" OnChange="@(it => { Child.LastName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Имя" Value="@Child.FirstName" OnChange="@(it => { Child.FirstName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Отчество" Value="@Child.SecondName" OnChange="@(it => { Child.SecondName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Номер телефона" Value="@Child.PhoneNumber" OnChange="@(it => { Child.PhoneNumber = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Электронный адрес" Value="@Child.Email" OnChange="@(it => { Child.Email = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Ссылка на фото" Value="@Child.ImageUrl" OnChange="@(it => { Child.ImageUrl = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Отец" Value="@Child.FatherName" OnChange="@(it => { Child.FatherName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Телефон отца" Value="@Child.FatherPhone" OnChange="@(it => { Child.FatherPhone = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Мать" Value="@Child.MotherName" OnChange="@(it => { Child.MotherName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Телефон матери" Value="@Child.MotherPhone" OnChange="@(it => { Child.MotherPhone = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Оплата за час занятия" Value="@Child.PerHour" OnChange="@(it => { Child.PerHour = (string)it.Value; Edited(); })" />
+    </div>
+    <div class="w3-row">
+        @if (!_success)
+        {
+            if (!_busy)
+            {
+                <HalfButtonComponent Color="green" Text="Сохранить" Click=@Save />
+                <HalfButtonComponent Color="red" Text="Удалить" Click=@Delete />
+            }
+            else if (_saving)
+            {
+                <HalfButtonComponent Color="green" NoHover=true Text="Сохраняем..." />
+                <HalfButtonComponent Color="red" Disabled=true NoHover=true Text="Удалить" />
+            }
+            else
+            {
+                <HalfButtonComponent Color="green" Disabled=true NoHover=true Text="Сохранить" />
+                <HalfButtonComponent Color="red" NoHover=true Text="Удаляем..." />
+            }
+        }
+        else
+        {
+            <HalfButtonComponent Color="green" NoHover=true Disabled=true Text="Сохранить" />
+            <HalfButtonComponent Color="red" Click=@Delete Text="Удалить" />
+        }
+    </div>
+    @if (ReadStatistic)
+    {
+        <ButtonComponent Color="blue" Click=@(() => UriHelper.NavigateTo($"/statistic/child/{Child.Id}")) Text="Статистика" />
+    }
+</div>
+
+@functions {
+    bool _busy { get; set; } = false;
+    bool _success { get; set; } = true;
+    bool _saving { get; set; } = true;
+
+    [Parameter]
+    C Child { get; set; }
+
+    [Parameter]
+    bool ReadStatistic { get; set; }
+
+    async void Save()
+    {
+        if (_busy || _success)
+            return;
+
+        _busy = true;
+        _saving = true;
+        StateHasChanged();
+
+        Child.Id = await SubmitAsync(Child);
+
+        _busy = false;
+        _success = true;
+        StateHasChanged();
+    }
+
+    async void Delete()
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        _saving = false;
+        StateHasChanged();
+
+        await DeleteAsync(Child.Id, "/children");
+    }
+
+    void Edited()
+    {
+        _success = false;
+        StateHasChanged();
+    }
+}
