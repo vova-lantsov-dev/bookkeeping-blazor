@@ -1,0 +1,55 @@
+﻿@inherits BaseComponent
+
+@if (_model != null)
+{
+    <div class="w3-container w3-padding-small">
+        <h3>@Date.date, @Date.name</h3>
+        <div class="w3-responsive">
+            <table class="w3-table-all w3-centered">
+                <tr>
+                    <th></th>
+                    @foreach (var teacher in _model.Teachers)
+                    {
+                        <th>@teacher.Name</th>
+                    }
+                </tr>
+                @foreach (var time in _model.Times)
+                {
+                    <tr>
+                        <th style="width:90px">@time</th>
+                        @foreach (var teacher in _model.Teachers)
+                        {
+                            var subject = _model.Subjects.Find(s => s.Time == time && s.Owner.Id == teacher.Id)
+                                ?? new S { Children = new List<Shared.IdNamePair>(), Date = Date.date, Time = time, Owner = teacher };
+                            <SubjectsTableItem Currents=@subject.Children
+                                               AllChildren=@_model.Children.ToList()
+                                               Write=@(WriteTeacherSubjects || subject.Owner.Id == CurrentId)
+                                               Date=@Date.date
+                                               Time=@subject.Time
+                                               Owner=@subject.Owner />
+                        }
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+}
+
+@functions {
+    Shared.Day _model;
+
+    [Parameter]
+    (string date, string name) Date { get; set; }
+
+    [Parameter]
+    string CurrentId { get; set; }
+
+    [Parameter]
+    bool WriteTeacherSubjects { get; set; }
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        _model = await Get<Shared.Day>($"/api/subjectsModel/?date={Date.date}");
+    }
+}
