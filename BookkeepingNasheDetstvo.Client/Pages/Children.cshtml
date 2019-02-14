@@ -1,0 +1,36 @@
+﻿@layout __Layout
+@page "/children"
+@inherits BaseComponent
+
+<ButtonComponent Color="blue" Text="Добавить ребёнка" Click=@(() => UriHelper.NavigateTo("/child")) />    
+
+@if (_children == null)
+{
+    if (IsOk)
+    {
+        <Loading />
+    }
+    else
+    {
+        <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
+    }
+}
+else if (_children.Count == 0)
+{
+    <p>Детей пока что нет.</p>
+}
+else
+{
+    <AvatarList Models=@_children.Select(c => new AvatarItemModel { AvatarUrl = c.ImageUrl, Title = $"{c.LastName} {c.FirstName}".Trim(), ViewUrl = $"/child/{c.Id}" }) UriHelper=@UriHelper />
+}
+
+@functions {
+    List<C> _children;
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        _children = await Get<List<C>>("/api/children");
+        IsOk = _children != default;
+    }
+}

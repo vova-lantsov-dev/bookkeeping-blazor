@@ -1,0 +1,59 @@
+﻿@layout __Layout
+@page "/child"
+@page "/child/{Id}"
+@inherits BaseComponent
+
+@if (_child == null)
+{
+    if (IsOk)
+    {
+        <Loading />
+    }
+    else
+    {
+        <Action Text="Ребёнок с таким идентификатором не найден в базе данных." ButtonAction=@(() => UriHelper.NavigateTo("/children")) />
+    }
+}
+else
+{
+    <Avatar AvatarUrl=@_child.ImageUrl />
+    if (Current?.EditTeachers ?? false)
+    {
+        <ChildInputs Base="child" Child=@_child ReadStatistic=@(Current?.ReadGlobalStatistics ?? false) />
+    }
+    else
+    {
+        <ChildReadOnly Child=@_child ReadStatistic=@(Current?.ReadGlobalStatistics ?? false) />
+    }
+}
+
+@functions {
+    C _child;
+
+    [Parameter]
+    string Id { get; set; }
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        await LoadCurrent();
+        _child = !string.IsNullOrEmpty(Id)
+            ? await Get<C>($"/api/child/{Id}")
+            : new C
+            {
+                Email = "",
+                FirstName = "",
+                ImageUrl = "",
+                LastName = "",
+                PhoneNumber = "+380",
+                SecondName = "",
+                FatherName = "",
+                FatherPhone = "+380",
+                MotherName = "",
+                MotherPhone = "+380",
+                PerHour = "0"
+            };
+
+        IsOk = _child != default;
+    }
+}
