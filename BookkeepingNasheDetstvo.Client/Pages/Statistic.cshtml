@@ -1,0 +1,99 @@
+﻿@layout __Layout
+@page "/statistic/{Type}/{Id}"
+@inherits BaseComponent
+
+@if (!string.IsNullOrEmpty(_statistic?.Name))
+{
+    <div class="w3-margin-top w3-margin-bottom w3-center w3-block">
+        <label class="w3-xlarge w3-text-teal">@_statistic.Name</label>
+    </div>
+}
+<div class="w3-padding-small">
+    <h2>Выберите промежуток:</h2>
+    <div class="w3-container w3-card-2 w3-padding-small">
+        <label class="w3-large">От</label>
+        <input class="w3-input w3-large" type="text" format-value="d-M-yyyy" bind="@From" />
+        <label class="w3-large">До</label>
+        <input class="w3-input w3-large" type="text" format-value="d-M-yyyy" bind="@To" />
+    </div>
+</div>
+@if (!_busy)
+{
+    <ButtonComponent Color="blue" Text="Обновить данные" Click=@(async () => await UpdateStatistic()) />
+}
+else
+{
+    <ButtonComponent Color="blue" Text="Обновляем данные..." NoHover=true Disabled=true Click=@(async () => await UpdateStatistic()) />
+}
+<div class="w3-container">
+    @if (_statistic == null)
+    {
+        if (IsOk)
+        {
+            <Loading />
+        }
+        else
+        {
+            <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
+        }
+    }
+    else
+    {
+        <label>Всего часов проведено за выбранный срок: @_statistic.TotalHours</label>
+        <br>
+        <label>Оплата за час занятия: @_statistic.PerHour грн</label>
+        <br>
+        <label>Всего к оплате за указанный промежуток времени: @(int.TryParse(_statistic.TotalHours, out var totalHours) && decimal.TryParse(_statistic.PerHour, out var perHour) ? (totalHours * perHour).ToString() : "0") грн</label>
+        if (_statistic.SourceItems.Any())
+        {
+            <div class="w3-container w3-padding-small">
+                <h2>Подробная статистика:</h2>
+            </div>
+            <AvatarList UriHelper=@UriHelper Models=@(_statistic.SourceItems.Select(si => new AvatarItemModel { AvatarUrl = si.ImageUrl, Title = $"{si.Name} — {si.TotalHours} час(а/ов)", ViewUrl = $"/{(Type == "child" ? "teacher" : "child")}/{si.Id}" })) />
+        }
+    }
+</div>
+
+@functions {
+bool _busy = true;
+
+DateTime From { get; set; }
+DateTime To { get; set; }
+
+St _statistic;
+
+[Parameter]
+string Id { get; set; }
+
+[Parameter]
+string Type { get; set; }
+
+protected override async Task OnInitAsync()
+{
+    await CheckAccessToken();
+    await LoadCurrent();
+    if (!Current.ReadGlobalStatistics || Type != "child" && Type != "teacher")
+        UriHelper.NavigateTo("/");
+
+    await UpdateStatistic();
+}
+
+async Task UpdateStatistic()
+{
+    _busy = true;
+    StateHasChanged();
+
+    if (From == default)
+    {
+        var now = DateTime.Now;
+        From = new DateTime(now.Year, now.Month, 1);
+        To = now.Date;
+    }
+
+    _statistic = await Get<St>($"/api/statistic/{Type}/{Id}/?from={From:d-M-yyyy}&to={To:d-M-yyyy}");
+    IsOk = _statistic != default;
+
+    _busy = false;
+    StateHasChanged();
+}
+}
