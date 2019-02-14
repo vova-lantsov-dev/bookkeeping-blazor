@@ -1,0 +1,30 @@
+﻿<div class="w3-container w3-card-4">
+    <div class="w3-padding-small">
+        <label>Фамилия: @Child.LastName</label>
+        <br />
+        <label>Имя: @Child.FirstName</label>
+        <br />
+        <label>Отчество: @Child.SecondName</label>
+        <br />
+        <label>Электронный адрес: @Child.Email</label>
+        <br />
+        <label>ФИО отца: @Child.FatherName</label>
+        <br />
+        <label>ФИО матери: @Child.MotherName</label>
+    </div>
+    @if (ReadStatistic)
+    {
+        <ButtonComponent Click=@(() => UriHelper.NavigateTo($"/statistic/child/{Child.Id}")) Color="blue" Text="Статистика" />
+    }
+</div>
+
+@functions {
+    [Parameter]
+    C Child { get; set; }
+
+    [Parameter]
+    bool ReadStatistic { get; set; }
+
+    [Inject]
+    IUriHelper UriHelper { get; set; }
+}
