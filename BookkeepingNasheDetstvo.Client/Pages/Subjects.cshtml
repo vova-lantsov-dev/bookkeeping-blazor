@@ -1,0 +1,42 @@
+﻿@layout __Layout
+@page "/"
+@using System.Globalization
+@inherits BaseComponent
+
+<InputDateComponent Date="@_date" OnChange="@((DateTime dt) => { _date = dt; UpdateDates(); StateHasChanged(); })" />
+
+@if (Dates.Count > 0)
+{
+    <ul class="w3-ul w3-card-4">
+        @foreach (var date in Dates)
+        {
+            <SubjectsTable Date=@date CurrentId=@Current.Id WriteTeacherSubjects=@Current.EditSubjects />
+        }
+    </ul>
+}
+
+@functions {
+    readonly List<(string date, string name)> Dates = new List<(string date, string name)>();
+    readonly DateTimeFormatInfo _dtFormat = new CultureInfo("ru-RU").DateTimeFormat;
+    DateTime _date = DateTime.Today;
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        await LoadCurrent();
+        
+        UpdateDates();
+    }
+
+    void UpdateDates()
+    {
+        var copyDate = _date;
+        Dates.Clear();
+        for (var i = 0; i < 7; i++)
+        {
+            if (copyDate.DayOfWeek != DayOfWeek.Sunday)
+                Dates.Add((copyDate.ToString("dd-MM-yyyy"), _dtFormat.GetDayName(copyDate.DayOfWeek)));
+            copyDate = copyDate.AddDays(1d);
+        }
+    }
+}
