@@ -1,0 +1,10 @@
+.idea/
+.vs/
+.vscode/
+.git/
+
+bin/
+obj/
+Properties/
+
+*.user
