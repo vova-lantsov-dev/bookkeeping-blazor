@@ -1,4 +1,5 @@
-﻿@inherits BaseComponent
+﻿@using BookkeepingNasheDetstvo.Shared.Extensions
+@inherits BaseComponent
 
 @if (_model != null)
 {
@@ -13,7 +14,7 @@
                         <th>@teacher.Name</th>
                     }
                 </tr>
-                @foreach (var time in _model.Times)
+                @foreach (var time in TimeExtensions.GetTimes())
                 {
                     <tr>
                         <th style="width:90px">@time</th>
@@ -23,7 +24,7 @@
                                 ?? new S { Children = new List<Shared.IdNamePair>(), Date = Date.date, Time = time, Owner = teacher };
                             <SubjectsTableItem Currents=@subject.Children
                                                AllChildren=@_model.Children.ToList()
-                                               Write=@(WriteTeacherSubjects || subject.Owner.Id == CurrentId)
+                                               Write=@(WriteTeacherSubjects)
                                                Date=@Date.date
                                                Time=@subject.Time
                                                Owner=@subject.Owner />
