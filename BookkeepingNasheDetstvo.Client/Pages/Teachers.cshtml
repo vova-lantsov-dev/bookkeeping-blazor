@@ -4,7 +4,7 @@
 
 <ButtonComponent Color="blue" Text="Добавить преподавателя" Click=@(() => UriHelper.NavigateTo("/teacher")) />
 
-@if (_teachers == null)
+@if (_models == null)
 {
     if (IsOk)
     {
@@ -15,7 +15,7 @@
         <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
     }
 }
-else if (_teachers.Count == 0)
+else if (_models.Count == 0)
 {
     <p>Преподавателей пока что нет.</p>
 }
@@ -25,7 +25,8 @@ else
 }
 
 @functions {
-    List<AvatarItemModel> _models;
+    // ReSharper disable once FieldCanBeMadeReadOnly.Local
+    List<AvatarItemModel> _models = new List<AvatarItemModel>();
     
     protected override async Task OnInitAsync()
     {
@@ -34,17 +35,18 @@ else
         
         var teachers = await Get<List<T>>("/api/teachers");
 
-        if (teachers == default)
-        {
-            IsOk = false;
-            foreach (var teacher in teachers)
-                _models.Add(new AvatarItemModel
-                {
-                    AvatarUrl = teacher.ImageUrl,
-                    Title = $"{teacher.LastName} {teacher.FirstName}".Trim(),
-                    ViewUrl = $"/teacher/{teacher.Id}"
-                });
-        }
-        else IsOk = true;
+        IsOk = teachers != default;
+        if (!IsOk)
+            return;
+        
+        _models.Clear();
+        // ReSharper disable once PossibleNullReferenceException
+        foreach (var teacher in teachers)
+            _models.Add(new AvatarItemModel
+            {
+                AvatarUrl = teacher.ImageUrl,
+                Title = $"{teacher.LastName} {teacher.FirstName}".Trim(),
+                ViewUrl = $"/teacher/{teacher.Id}"
+            });
     }
 }
