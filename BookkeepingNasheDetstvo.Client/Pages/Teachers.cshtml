@@ -31,7 +31,6 @@ else
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
-        await LoadCurrent();
         
         var teachers = await Get<List<T>>("/api/teachers");
 
