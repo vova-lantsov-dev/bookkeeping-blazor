@@ -39,14 +39,12 @@ protected override async Task OnInitAsync()
         ? await Get<T>($"/api/teacher/{Id}")
         : new T
         {
-            PerHour = "0",
+            PerHour = 0m,
             Additional = "",
-            Additional2 = "",
             Email = "",
             FirstName = "",
             ImageUrl = "",
             LastName = "",
-            PasswordHash = "",
             PhoneNumber = "+380",
             ReadGlobalStatistics = false,
             SecondName = "",
