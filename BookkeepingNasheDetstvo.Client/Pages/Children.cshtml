@@ -4,7 +4,7 @@
 
 <ButtonComponent Color="blue" Text="Добавить ребёнка" Click=@(() => UriHelper.NavigateTo("/child")) />    
 
-@if (_children == null)
+@if (_models == null)
 {
     if (IsOk)
     {
@@ -15,22 +15,37 @@
         <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
     }
 }
-else if (_children.Count == 0)
+else if (_models.Count == 0)
 {
     <p>Детей пока что нет.</p>
 }
 else
 {
-    <AvatarList Models=@_children.Select(c => new AvatarItemModel { AvatarUrl = c.ImageUrl, Title = $"{c.LastName} {c.FirstName}".Trim(), ViewUrl = $"/child/{c.Id}" }) UriHelper=@UriHelper />
+    <AvatarList Models=@_models UriHelper=@UriHelper />
 }
 
 @functions {
-    List<C> _children;
+    // ReSharper disable once FieldCanBeMadeReadOnly.Local
+    List<AvatarItemModel> _models = new List<AvatarItemModel>();
 
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
-        _children = await Get<List<C>>("/api/children");
-        IsOk = _children != default;
+        
+        var children = await Get<List<C>>("/api/children");
+        
+        IsOk = children != default;
+        if (!IsOk)
+            return;
+        
+        _models.Clear();
+        // ReSharper disable once PossibleNullReferenceException
+        foreach (var child in children)
+            _models.Add(new AvatarItemModel
+            {
+                AvatarUrl = child.ImageUrl,
+                Title = $"{child.LastName} {child.FirstName}".Trim(),
+                ViewUrl = $"/child/{child.Id}"
+            });
     }
 }
