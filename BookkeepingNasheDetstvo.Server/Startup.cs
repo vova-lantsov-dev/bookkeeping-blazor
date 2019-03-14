@@ -1,15 +1,15 @@
 using BookkeepingNasheDetstvo.Server.Services;
-using Microsoft.AspNetCore.Blazor.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Serialization;
 
 namespace BookkeepingNasheDetstvo.Server
 {
@@ -17,22 +17,21 @@ namespace BookkeepingNasheDetstvo.Server
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvcCore().AddJsonFormatters(settings =>
+            services.AddMvcCore().AddNewtonsoftJson(options =>
             {
-                settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            }).AddDataAnnotations().AddRazorViewEngine().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            }).AddDataAnnotations().AddRazorViewEngine().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
             services.AddResponseCompression(options =>
             {
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
                 {
-                    MediaTypeNames.Application.Octet,
-                    WasmMediaTypeNames.Application.Wasm,
+                    MediaTypeNames.Application.Octet
                 });
             });
             services.AddSingleton<BookkeepingContext>();
         }
         
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseExceptionHandler(appError =>
             {
@@ -48,6 +47,13 @@ namespace BookkeepingNasheDetstvo.Server
                 });
             });
             app.UseResponseCompression();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseBlazorDebugging();
+            }
+            
             app.UseMvc();
             app.UseBlazor<Client.Startup>();
         }
