@@ -1,7 +1,7 @@
 ﻿@layout __Layout
 @page "/child"
 @page "/child/{Id}"
-@inherits BaseComponent
+@inherits BookkeepingNasheDetstvo.Client.Components.ActionComponents.BaseComponent
 
 @if (_child == null)
 {
@@ -32,6 +32,8 @@ else
 
     [Parameter]
     string Id { get; set; }
+    
+    
 
     protected override async Task OnInitAsync()
     {

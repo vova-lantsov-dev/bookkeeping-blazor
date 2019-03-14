@@ -1,6 +1,6 @@
 ﻿@layout __Layout
 @page "/statistic/{Type}/{Id}"
-@inherits BaseComponent
+@inherits BookkeepingNasheDetstvo.Client.Components.ActionComponents.BaseComponent
 
 @if (!string.IsNullOrEmpty(_statistic?.Name))
 {
@@ -43,7 +43,7 @@ else
         <br>
         <label>Оплата за час занятия: @_statistic.PerHour грн</label>
         <br>
-        <label>Всего к оплате за указанный промежуток времени: @(int.TryParse(_statistic.TotalHours, out var totalHours) && decimal.TryParse(_statistic.PerHour, out var perHour) ? (totalHours * perHour).ToString() : "0") грн</label>
+        <label>Всего к оплате за указанный промежуток времени: @(_statistic.TotalHours * _statistic.PerHour) грн</label>
         if (_statistic.SourceItems.Any())
         {
             <div class="w3-container w3-padding-small">
