@@ -1,15 +1,15 @@
-﻿using BookkeepingNasheDetstvo.Client.Extensions;
-using BookkeepingNasheDetstvo.Shared;
-using Microsoft.AspNetCore.Blazor.Components;
-using Microsoft.AspNetCore.Blazor.Services;
-using Microsoft.JSInterop;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using BookkeepingNasheDetstvo.Client.Extensions;
+using BookkeepingNasheDetstvo.Shared;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Services;
+using Microsoft.JSInterop;
 
-namespace BookkeepingNasheDetstvo.Client.Components
+namespace BookkeepingNasheDetstvo.Client.Components.ActionComponents
 {
-    public class BaseComponent : BlazorComponent
+    public class BaseComponent : ComponentBase
     {
         protected Teacher Current { get; set; }
         protected string AccessToken { get; set; }
@@ -26,7 +26,11 @@ namespace BookkeepingNasheDetstvo.Client.Components
             {
                 AccessToken = await BrowserExtensions.ReadLocalStorageAsync(Defaults.AuthTokenStorageName);
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
+
             if (string.IsNullOrEmpty(AccessToken))
                 UriHelper.NavigateTo("/authorize");
         }

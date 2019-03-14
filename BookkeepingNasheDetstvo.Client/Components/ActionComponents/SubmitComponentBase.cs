@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Blazor.Components;
-using Microsoft.JSInterop;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 
-namespace BookkeepingNasheDetstvo.Client.Components
+namespace BookkeepingNasheDetstvo.Client.Components.ActionComponents
 {
     public class SubmitComponentBase : BaseComponent
     {

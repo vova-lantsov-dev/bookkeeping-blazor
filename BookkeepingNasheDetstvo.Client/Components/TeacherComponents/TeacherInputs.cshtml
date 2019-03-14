@@ -1,4 +1,5 @@
-﻿@inherits SubmitComponentBase
+﻿@using System.Globalization
+@inherits BookkeepingNasheDetstvo.Client.Components.ActionComponents.SubmitComponentBase
 
 <div class="w3-rest w3-mobile">
     <div class="w3-container w3-padding">
@@ -8,36 +9,34 @@
         <InputLabelComponent Label="Номер телефона" Value="@Teacher.PhoneNumber" OnChange="@(it => { Teacher.PhoneNumber = (string)it.Value; Edited(); })" />
         <InputLabelComponent Label="Электронный адрес" Value="@Teacher.Email" OnChange="@(it => { Teacher.Email = (string)it.Value; Edited(); })" />
         <InputLabelComponent Label="Ссылка на фото" Value="@Teacher.ImageUrl" OnChange="@(it => { Teacher.ImageUrl = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Пароль" Value="@Teacher.PasswordHash" OnChange="@(it => { Teacher.PasswordHash = (string)it.Value; Edited(); })" />
         <InputLabelComponent Label="Дополнительное поле 1" Value="@Teacher.Additional" OnChange="@(it => { Teacher.Additional = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Дополнительное поле 2" Value="@Teacher.Additional2" OnChange="@(it => { Teacher.Additional2 = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Оплата за час занятия" Value="@Teacher.PerHour" OnChange="@(it => { Teacher.PerHour = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Оплата за час занятия" Value="@Teacher.PerHour.ToString(CultureInfo.CurrentCulture)" OnChange="@(it => { Teacher.PerHour = decimal.TryParse((string)it.Value, out var perHour) ? perHour : 0m; Edited(); })" />
     </div>
     <br />
     <div class="w3-container w3-padding">
-        <input class="w3-check" type="checkbox" bind="Teacher.WriteChildren" onclick="@Edited" />
+        <input class="w3-check" type="checkbox" bind="@Teacher.EditChildren" onclick="@Edited" />
         <label>Изменение личных данных детей</label>
         <br />
-        <input class="w3-check" type="checkbox" bind="Teacher.WriteTeachers" onclick="@Edited" />
+        <input class="w3-check" type="checkbox" bind="@Teacher.EditTeachers" onclick="@Edited" />
         <label>Изменение личных данных всех преподавателей</label>
         <br />
-        <input class="w3-check" type="checkbox" bind="Teacher.WriteTeacherSubjects" onclick="@Edited" />
+        <input class="w3-check" type="checkbox" bind="@Teacher.EditSubjects" onclick="@Edited" />
         <label>Изменение расписания всех преподавателей</label>
         <br />
-        <input class="w3-check" type="checkbox" bind="Teacher.ReadStatistics" onclick="@Edited" />
+        <input class="w3-check" type="checkbox" bind="@Teacher.ReadGlobalStatistics" onclick="@Edited" />
         <label>Просмотр статистики</label>
     </div>
     <div class="w3-row">
-        @if (!_success)
+        @if (!Success)
         {
             Console.WriteLine("Success: false");
-            if (!_busy)
+            if (!Busy)
             {
                 Console.WriteLine("Busy: false");
                 <HalfButtonComponent Color="green" Text="Сохранить" Click=@Save />
                 <HalfButtonComponent Color="red" Text="Удалить" Click=@Delete />
             }
-            else if (_saving)
+            else if (Saving)
             {
                 Console.WriteLine("Saving: true");
                 <HalfButtonComponent Color="green" NoHover=true Text="Сохраняем..." />
@@ -64,9 +63,9 @@
 </div>
 
 @functions {
-    bool _busy { get; set; } = false;
-    bool _success { get; set; } = true;
-    bool _saving { get; set; } = true;
+    bool Busy { get; set; }
+    bool Success { get; set; } = true;
+    bool Saving { get; set; } = true;
 
     [Parameter]
     T Teacher { get; set; }
@@ -76,27 +75,27 @@
 
     async void Save()
     {
-        if (_busy || _success)
+        if (Busy || Success)
             return;
 
-        _busy = true;
-        _saving = true;
+        Busy = true;
+        Saving = true;
         StateHasChanged();
 
         Teacher.Id = await SubmitAsync(Teacher);
 
-        _busy = false;
-        _success = true;
+        Busy = false;
+        Success = true;
         StateHasChanged();
     }
 
     async void Delete()
     {
-        if (_busy)
+        if (Busy)
             return;
 
-        _busy = true;
-        _saving = false;
+        Busy = true;
+        Saving = false;
         StateHasChanged();
 
         await DeleteAsync(Teacher.Id, "/teachers");
@@ -104,7 +103,7 @@
 
     void Edited()
     {
-        _success = false;
+        Success = false;
         StateHasChanged();
     }
 }

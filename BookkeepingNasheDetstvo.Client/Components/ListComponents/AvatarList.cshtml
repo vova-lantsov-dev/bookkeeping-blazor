@@ -2,7 +2,7 @@
     <ul class="w3-ul w3-card-4">
         @foreach (var model in Models)
         {
-            <AvatarListItem Model=@model UriHelper=@UriHelper />
+            <AvatarListItem Model="@(model)" UriHelper="@UriHelper" />
         }
     </ul>
 </div>
