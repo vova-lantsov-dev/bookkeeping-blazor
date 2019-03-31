@@ -1,45 +1,41 @@
-@layout __Layout
+﻿@layout __Layout
 @page "/teachers"
 @inherits BaseComponent
 
 <ButtonComponent Color="blue" Text="Добавить преподавателя" Click=@(() => UriHelper.NavigateTo("/teacher")) />
 
-@if (_models == null)
-{
-    if (IsOk)
-    {
-        <Loading />
-    }
-    else
-    {
-        <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
-    }
-}
-else if (_models.Count == 0)
-{
-    <p>Преподавателей пока что нет.</p>
-}
-else
-{
-    <AvatarList Models=@_models UriHelper=@UriHelper />
-}
+<LoadingAction IsOk="@IsOk" CheckIfNullObject="@_models" SubmitButtonText="Повторить попытку"
+               Message="Произошла ошибка при загрузке списка преподавателей."
+               SubmitButtonAction="@(async () =>
+                                     {
+                                         IsOk = true;
+                                         StateHasChanged();
+                                         await Load();
+                                     })">
+    <AvatarListAction Models="@_models" />
+</LoadingAction>
 
-@functions {
-    // ReSharper disable once FieldCanBeMadeReadOnly.Local
-    List<AvatarItemModel> _models = new List<AvatarItemModel>();
+@functions
+{
+    private readonly List<AvatarItemModel> _models = new List<AvatarItemModel>();
     
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
-        
+        await Load();
+    }
+
+    private async Task Load()
+    {
         var teachers = await Get<List<T>>("/api/teachers");
 
-        IsOk = teachers != default;
-        if (!IsOk)
+        if (teachers == default)
+        {
+            IsOk = false;
             return;
+        }
         
         _models.Clear();
-        // ReSharper disable once PossibleNullReferenceException
         foreach (var teacher in teachers)
             _models.Add(new AvatarItemModel
             {
