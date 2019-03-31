@@ -6,21 +6,13 @@
 <LoadingAction IsOk="@IsOk" CheckIfNullObject="@_child" NotOkText="Произошла ошибка при поиске ребёнка."
                NotOkSubmitButtonText="Вернуться назад" NotOkRedirectUrl="/children">
     <Avatar AvatarUrl=@_child.ImageUrl />
-    if (Current?.EditTeachers ?? false)
-    {
-        <ChildInputs Base="child" Child=@_child ReadStatistic=@(Current?.ReadGlobalStatistics ?? false) />
-    }
-    else
-    {
-        <ChildReadOnly Child=@_child ReadStatistic=@(Current?.ReadGlobalStatistics ?? false) />
-    }
+    <ChildComponent EditChildren="@Current.EditChildren" ReadGlobalStatistics="@Current.ReadGlobalStatistics" Child="@_child" />
 </LoadingAction>
 
 @functions {
-    C _child;
+    private C _child;
 
-    [Parameter]
-    string Id { get; set; }
+    [Parameter] private string Id { get; set; }
 
     protected override async Task OnInitAsync()
     {
@@ -38,7 +30,8 @@
                 FatherPhone = "+380",
                 MotherName = "",
                 MotherPhone = "+380",
-                PerHour = 0m
+                PerHour = 0m,
+                PerHourGroup = 0m
             };
 
         IsOk = _child != default;
