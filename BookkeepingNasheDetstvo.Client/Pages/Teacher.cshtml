@@ -3,11 +3,11 @@
 @page "/teacher/{Id}"
 @inherits BaseComponent
 
-<LoadingAction IsOk="@IsOk" CheckIfNullObject="@_teacher" NotOkText="Произошла ошибка при поиске преподавателя."
-               NotOkSubmitButtonText="Вернуться назад" NotOkRedirectUrl="/teachers">
+<RedirectLoadingAction IsOk="@IsOk" CheckIfNullObject="@_teacher" Message="Произошла ошибка при поиске преподавателя."
+               RedirectUrl="/teachers">
     <Avatar AvatarUrl="@_teacher.ImageUrl" />
     <TeacherComponent ReadGlobalStatistic="@Current.ReadGlobalStatistics" Teacher="@_teacher" EditTeachers="@Current.EditTeachers" />
-</LoadingAction>
+</RedirectLoadingAction>
 
 @functions
 {
