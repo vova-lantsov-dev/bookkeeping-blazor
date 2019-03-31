@@ -1,10 +1,9 @@
-﻿using BookkeepingNasheDetstvo.Server.Models;
-using BookkeepingNasheDetstvo.Shared;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using MongoDB.Driver;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 namespace BookkeepingNasheDetstvo.Server.Services
 {
@@ -12,30 +11,25 @@ namespace BookkeepingNasheDetstvo.Server.Services
     {
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (!context.HttpContext.Request.Headers.TryGetValue("Token", out var authToken))
+            if (!context.HttpContext.Request.Headers.TryGetValue("Auth-Token", out var token))
             {
                 context.Result = new UnauthorizedResult();
                 return;
             }
 
-            var dbContext = (BookkeepingContext) context.HttpContext.RequestServices.GetService(typeof(BookkeepingContext));
-            var session = await dbContext.Sessions.Find(s => s.Token == authToken[0]).FirstOrDefaultAsync();
+            var cancellationToken = context.HttpContext.RequestAborted;
+            var bookkeepingContext = context.HttpContext.RequestServices.GetService<BookkeepingContext>();
+            var session = await bookkeepingContext.Sessions.Find(s => s.Token == token)
+                .SingleOrDefaultAsync(cancellationToken);
             if (session == default)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new StatusCodeResult(403);
                 return;
             }
 
-            var teacher = await dbContext.Teachers.Find(Builders<Teacher>.Filter.Eq(t => t.Id, session.OwnerId)).FirstOrDefaultAsync();
-            if (teacher == default)
-            {
-                context.Result = new UnauthorizedResult();
-                return;
-            }
-            
             if (context.ActionArguments.ContainsKey("current"))
-                context.ActionArguments["current"] = teacher;
-            await next();
+                context.ActionArguments["current"] = await bookkeepingContext.Teachers.Find(
+                    t => t.Id == session.OwnerId).SingleAsync(cancellationToken);
         }
     }
 }
