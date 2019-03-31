@@ -1,6 +1,6 @@
 @if (Models.Count == 0)
 {
-    <p>Преподавателей пока что нет.</p>
+    <p>@Message</p>
 }
 else
 {
@@ -10,4 +10,6 @@ else
 @functions
 {
     [Parameter] private ICollection<AvatarItemModel> Models { get; set; }
+    
+    [Parameter] private string Message { get; set; }
 }
