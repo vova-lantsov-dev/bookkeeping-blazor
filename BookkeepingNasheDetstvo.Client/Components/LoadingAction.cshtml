@@ -1,0 +1,35 @@
+﻿@inject IUriHelper UriHelper
+
+@if (CheckIfNullObject == null)
+{
+    if (IsOk)
+    {
+        <p>Ожидайте, данные загружаются...</p>
+    }
+    else
+    {
+        <div class="w3-container">
+            <h5>@NotOkText</h5>
+            <button onclick=@(() => UriHelper.NavigateTo(NotOkRedirectUrl))>@NotOkSubmitButtonText</button>
+        </div>
+    }
+}
+else
+{
+    @ChildContent
+}
+
+@functions
+{
+    [Parameter] private bool IsOk { get; set; }
+    
+    [Parameter] private object CheckIfNullObject { get; set; }
+    
+    [Parameter] private string NotOkText { get; set; }
+    
+    [Parameter] private string NotOkSubmitButtonText { get; set; }
+    
+    [Parameter] private string NotOkRedirectUrl { get; set; }
+    
+    [Parameter] private RenderFragment ChildContent { get; set; }
+}
