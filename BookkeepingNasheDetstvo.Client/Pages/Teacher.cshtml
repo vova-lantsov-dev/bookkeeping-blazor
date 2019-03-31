@@ -1,7 +1,7 @@
 ﻿@layout __Layout
 @page "/teacher"
 @page "/teacher/{Id}"
-@inherits BookkeepingNasheDetstvo.Client.Components.ActionComponents.BaseComponent
+@inherits BaseComponent
 
 <LoadingAction IsOk="@IsOk" CheckIfNullObject="@_teacher" NotOkText="Произошла ошибка при поиске преподавателя."
                NotOkSubmitButtonText="Вернуться назад" NotOkRedirectUrl="/teachers">

@@ -1,7 +1,7 @@
 ﻿@layout __Layout
 @page "/child"
 @page "/child/{Id}"
-@inherits BookkeepingNasheDetstvo.Client.Components.ActionComponents.BaseComponent
+@inherits BaseComponent
 
 <LoadingAction IsOk="@IsOk" CheckIfNullObject="@_child" NotOkText="Произошла ошибка при поиске ребёнка."
                NotOkSubmitButtonText="Вернуться назад" NotOkRedirectUrl="/children">
