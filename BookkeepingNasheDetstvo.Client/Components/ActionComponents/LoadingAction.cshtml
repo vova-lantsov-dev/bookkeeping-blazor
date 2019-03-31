@@ -1,6 +1,4 @@
-﻿@inject IUriHelper UriHelper
-
-@if (CheckIfNullObject == null)
+﻿@if (CheckIfNullObject == null)
 {
     if (IsOk)
     {
@@ -9,8 +7,8 @@
     else
     {
         <div class="w3-container">
-            <h5>@NotOkText</h5>
-            <button onclick=@(() => UriHelper.NavigateTo(NotOkRedirectUrl))>@NotOkSubmitButtonText</button>
+            <h5>@Message</h5>
+            <button onclick="@SubmitButtonAction">@SubmitButtonText</button>
         </div>
     }
 }
@@ -25,11 +23,11 @@ else
     
     [Parameter] private object CheckIfNullObject { get; set; }
     
-    [Parameter] private string NotOkText { get; set; }
+    [Parameter] private string Message { get; set; }
     
-    [Parameter] private string NotOkSubmitButtonText { get; set; }
+    [Parameter] private string SubmitButtonText { get; set; }
     
-    [Parameter] private string NotOkRedirectUrl { get; set; }
+    [Parameter] private Action SubmitButtonAction { get; set; }
     
     [Parameter] private RenderFragment ChildContent { get; set; }
 }
