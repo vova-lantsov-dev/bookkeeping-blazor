@@ -10,10 +10,10 @@
                                                   StateHasChanged();
                                               })" />
 
-@if (Dates.Count > 0)
+@if (_dates.Count > 0)
 {
     <ul class="w3-ul w3-card-4">
-        @foreach (var date in Dates)
+        @foreach (var date in _dates)
         {
             <SubjectsTable Date=@date CurrentId=@Current.Id WriteTeacherSubjects=@Current.EditSubjects />
         }
@@ -21,7 +21,7 @@
 }
 
 @functions {
-    private readonly List<(string date, string name)> Dates = new List<(string date, string name)>();
+    private readonly List<(string date, string name)> _dates = new List<(string date, string name)>();
     private readonly DateTimeFormatInfo _dtFormat = new CultureInfo("ru-RU").DateTimeFormat;
     private DateTime _date = DateTime.Today;
 
@@ -36,11 +36,11 @@
     private void UpdateDates()
     {
         var copyDate = _date;
-        Dates.Clear();
+        _dates.Clear();
         for (var i = 0; i < 7; i++)
         {
             if (copyDate.DayOfWeek != DayOfWeek.Sunday)
-                Dates.Add((copyDate.ToString("dd-MM-yyyy"), _dtFormat.GetDayName(copyDate.DayOfWeek)));
+                _dates.Add((copyDate.ToString("dd-MM-yyyy"), _dtFormat.GetDayName(copyDate.DayOfWeek)));
             copyDate = copyDate.AddDays(1d);
         }
     }
