@@ -1,10 +1,10 @@
 @if (EditChildren)
 {
-    <ChildInputs Base="child" Child="@Child" ReadStatistic="@ReadGlobalStatistics" />
+    <ChildInputs Base="child" Child="@Child" ReadGlobalStatistic="@ReadGlobalStatistics" />
 }
 else
 {
-    <ChildReadOnly Child="@Child" ReadStatistic="@ReadGlobalStatistics" />
+    <ChildReadOnly Child="@Child" ReadGlobalStatistic="@ReadGlobalStatistics" />
 }
 
 @functions

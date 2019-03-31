@@ -39,7 +39,7 @@
             <HalfButtonComponent Color="red" Click=@Delete Text="Удалить" />
         }
     </div>
-    @if (ReadStatistic)
+    @if (ReadGlobalStatistic)
     {
         <ButtonComponent Color="blue" Click=@(() => UriHelper.NavigateTo($"/statistic/child/{Child.Id}")) Text="Статистика" />
     }
@@ -54,7 +54,7 @@
     C Child { get; set; }
 
     [Parameter]
-    bool ReadStatistic { get; set; }
+    bool ReadGlobalStatistic { get; set; }
 
     async void Save()
     {

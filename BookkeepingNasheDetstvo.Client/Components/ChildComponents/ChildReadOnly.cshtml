@@ -10,7 +10,7 @@
         <br />
         <label>ФИО матери: @Child.MotherName</label>
     </div>
-    @if (ReadStatistic)
+    @if (ReadGlobalStatistic)
     {
         <ButtonComponent Click=@(() => UriHelper.NavigateTo($"/statistic/child/{Child.Id}")) Color="blue" Text="Статистика" />
     }
@@ -21,7 +21,7 @@
     C Child { get; set; }
 
     [Parameter]
-    bool ReadStatistic { get; set; }
+    bool ReadGlobalStatistic { get; set; }
 
     [Inject]
     IUriHelper UriHelper { get; set; }
