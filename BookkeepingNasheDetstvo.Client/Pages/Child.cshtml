@@ -3,19 +3,8 @@
 @page "/child/{Id}"
 @inherits BookkeepingNasheDetstvo.Client.Components.ActionComponents.BaseComponent
 
-@if (_child == null)
-{
-    if (IsOk)
-    {
-        <Loading />
-    }
-    else
-    {
-        <Action Text="Ребёнок с таким идентификатором не найден в базе данных." ButtonAction=@(() => UriHelper.NavigateTo("/children")) />
-    }
-}
-else
-{
+<LoadingAction IsOk="@IsOk" CheckIfNullObject="@_child" NotOkText="Произошла ошибка при поиске ребёнка."
+               NotOkSubmitButtonText="Вернуться назад" NotOkRedirectUrl="/children">
     <Avatar AvatarUrl=@_child.ImageUrl />
     if (Current?.EditTeachers ?? false)
     {
@@ -25,15 +14,13 @@ else
     {
         <ChildReadOnly Child=@_child ReadStatistic=@(Current?.ReadGlobalStatistics ?? false) />
     }
-}
+</LoadingAction>
 
 @functions {
     C _child;
 
     [Parameter]
     string Id { get; set; }
-    
-    
 
     protected override async Task OnInitAsync()
     {
