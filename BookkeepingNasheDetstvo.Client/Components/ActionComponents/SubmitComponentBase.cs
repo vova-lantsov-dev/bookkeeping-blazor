@@ -5,8 +5,7 @@ namespace BookkeepingNasheDetstvo.Client.Components.ActionComponents
 {
     public class SubmitComponentBase : BaseComponent
     {
-        [Parameter]
-        protected string Base { get; set; }
+        [Parameter] private string Base { get; set; }
 
         protected override Task OnInitAsync()
         {
