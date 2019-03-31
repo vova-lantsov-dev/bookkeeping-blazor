@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Services;
 using Microsoft.JSInterop;
 
-namespace BookkeepingNasheDetstvo.Client.Components.ActionComponents
+namespace BookkeepingNasheDetstvo.Client.Components
 {
     public class BaseComponent : ComponentBase
     {

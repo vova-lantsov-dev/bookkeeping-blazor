@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 
-namespace BookkeepingNasheDetstvo.Client.Components.ActionComponents
+namespace BookkeepingNasheDetstvo.Client.Components
 {
     public class SubmitComponentBase : BaseComponent
     {
