@@ -3,7 +3,12 @@
 @using System.Globalization
 @inherits BaseComponent
 
-<InputDateComponent Date="@_date" OnChange="@((DateTime dt) => { _date = dt; UpdateDates(); StateHasChanged(); })" />
+<InputDateComponent Date="@_date" OnChange="@((DateTime dt) =>
+                                              {
+                                                  _date = dt;
+                                                  UpdateDates();
+                                                  StateHasChanged();
+                                              })" />
 
 @if (Dates.Count > 0)
 {
@@ -16,9 +21,9 @@
 }
 
 @functions {
-    readonly List<(string date, string name)> Dates = new List<(string date, string name)>();
-    readonly DateTimeFormatInfo _dtFormat = new CultureInfo("ru-RU").DateTimeFormat;
-    DateTime _date = DateTime.Today;
+    private readonly List<(string date, string name)> Dates = new List<(string date, string name)>();
+    private readonly DateTimeFormatInfo _dtFormat = new CultureInfo("ru-RU").DateTimeFormat;
+    private DateTime _date = DateTime.Today;
 
     protected override async Task OnInitAsync()
     {
@@ -28,7 +33,7 @@
         UpdateDates();
     }
 
-    void UpdateDates()
+    private void UpdateDates()
     {
         var copyDate = _date;
         Dates.Clear();
