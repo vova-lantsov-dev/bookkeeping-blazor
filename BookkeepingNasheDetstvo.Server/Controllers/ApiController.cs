@@ -300,11 +300,5 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                 return statistic;
             }
         }
-
-        public class RemoveSubjectItemModel
-        {
-            public string Id;
-            public string ItemId;
-        }
     }
 }
