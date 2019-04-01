@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using BookkeepingNasheDetstvo.Server.Extensions;
+using MlkPwgen;
 
 namespace BookkeepingNasheDetstvo.Server.Controllers
 {
@@ -42,7 +43,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             string token;
             do
             {
-                token = MlkPwgen.PasswordGenerator.Generate(100);
+                token = PasswordGenerator.Generate(100);
             }
             // ReSharper disable once AccessToModifiedClosure
             while (await _context.Sessions.Find(s => s.Token == token).AnyAsync());
@@ -88,6 +89,26 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                 teacher.Id = ObjectId.GenerateNewId().ToString();
             await _context.Teachers.ReplaceOneAsync(t => t.Id == teacher.Id, teacher, new UpdateOptions { IsUpsert = true });
             return teacher.Id;
+        }
+
+        [HttpPost("teacher/password")]
+        [ValidateAccessToken]
+        public async Task<ActionResult> PostTeacherPassword([FromBody] PostTeacherPasswordModel model, Teacher current)
+        {
+            var affected = await _context.Teachers.Find(t => t.Id == model.TeacherId).SingleOrDefaultAsync();
+            if (affected == default)
+                return NotFound();
+            
+            if (!current.IsOwner && model.TeacherId != current.Id && (affected.IsOwner || !current.EditTeachers))
+                return StatusCode(403);
+
+            var newSalt = PasswordGenerator.Generate(8);
+            await _context.Credentials.UpdateOneAsync(c => c.Id == model.TeacherId,
+                Builders<Credential>.Update.Set(c => c.Salt, newSalt)
+                    .Set(c => c.PasswordHash, PasswordExtensions.HashPassword(model.NewPassword, newSalt)),
+                new UpdateOptions {IsUpsert = false});
+            
+            return Ok();
         }
 
         [HttpGet("children")]
