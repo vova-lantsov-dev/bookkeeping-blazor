@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using BookkeepingNasheDetstvo.Server.Models.Mvc;
 
 namespace BookkeepingNasheDetstvo.Server.Models
 {

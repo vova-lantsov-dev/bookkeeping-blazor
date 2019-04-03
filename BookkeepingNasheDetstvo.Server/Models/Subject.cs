@@ -1,5 +1,6 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System.Collections.Generic;
+using BookkeepingNasheDetstvo.Server.Models.Mvc;
 using MongoDB.Bson;
 
 namespace BookkeepingNasheDetstvo.Server.Models
