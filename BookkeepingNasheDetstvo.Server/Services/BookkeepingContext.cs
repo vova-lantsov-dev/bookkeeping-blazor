@@ -44,7 +44,7 @@ namespace BookkeepingNasheDetstvo.Server.Services
                 ImageUrl = "",
                 LastName = "Мантулина",
                 PhoneNumber = "+380983989420",
-                ReadGlobalStatistics = true,
+                ReadGlobalStatistic = true,
                 SecondName = "Степановна",
                 EditChildren = true,
                 EditTeachers = true,

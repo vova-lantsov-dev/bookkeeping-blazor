@@ -20,7 +20,7 @@ namespace BookkeepingNasheDetstvo.Server.Models
         public bool EditTeachers { get; set; }
         public bool EditChildren { get; set; }
         public bool EditSubjects { get; set; }
-        public bool ReadGlobalStatistics { get; set; }
+        public bool ReadGlobalStatistic { get; set; }
         public bool IsOwner { get; set; }
     }
 }
