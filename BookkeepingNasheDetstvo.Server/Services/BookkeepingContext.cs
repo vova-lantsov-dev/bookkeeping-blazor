@@ -1,6 +1,7 @@
-﻿using BookkeepingNasheDetstvo.Server.Extensions;
+﻿using System.Threading;
+using BookkeepingNasheDetstvo.Server.Extensions;
 using BookkeepingNasheDetstvo.Server.Models;
-using BookkeepingNasheDetstvo.Shared;
+using Microsoft.Extensions.Hosting;
 using MlkPwgen;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -15,7 +16,7 @@ namespace BookkeepingNasheDetstvo.Server.Services
         public readonly IMongoCollection<Session> Sessions;
         public readonly IMongoCollection<Credential> Credentials;
 
-        public BookkeepingContext()
+        public BookkeepingContext(IHostApplicationLifetime lifetime)
         {
             var mongo = new MongoClient("mongodb://localhost:27017");
             var db = mongo.GetDatabase(nameof(BookkeepingContext));
@@ -25,12 +26,12 @@ namespace BookkeepingNasheDetstvo.Server.Services
             Sessions = db.GetCollection<Session>(nameof(Sessions));
             Credentials = db.GetCollection<Credential>(nameof(Credentials));
             
-            AddDefaults();
+            AddDefaults(lifetime.ApplicationStopping);
         }
 
-        private void AddDefaults()
+        private void AddDefaults(CancellationToken cancellationToken)
         {
-            if (Teachers.Find(FilterDefinition<Teacher>.Empty).Any())
+            if (Teachers.Find(FilterDefinition<Teacher>.Empty).Any(cancellationToken))
                 return;
 
             var teacher = new Teacher
@@ -51,7 +52,7 @@ namespace BookkeepingNasheDetstvo.Server.Services
                 PerHourGroup = 0m,
                 Id = ObjectId.GenerateNewId().ToString()
             };
-            Teachers.InsertOne(teacher);
+            Teachers.InsertOne(teacher, cancellationToken: cancellationToken);
             
             var credential = new Credential
             {
@@ -59,7 +60,7 @@ namespace BookkeepingNasheDetstvo.Server.Services
                 Salt = PasswordGenerator.Generate(8)
             };
             credential.PasswordHash = PasswordExtensions.HashPassword("w5g5jCXn", credential.Salt);
-            Credentials.InsertOne(credential);
+            Credentials.InsertOne(credential, cancellationToken: cancellationToken);
         }
     }
 }
