@@ -15,6 +15,7 @@ namespace BookkeepingNasheDetstvo.Server.Services
         public readonly IMongoCollection<Subject> Subjects;
         public readonly IMongoCollection<Session> Sessions;
         public readonly IMongoCollection<Credential> Credentials;
+        public readonly IMongoCollection<Place> Places;
 
         public BookkeepingContext(IHostApplicationLifetime lifetime)
         {
@@ -25,6 +26,7 @@ namespace BookkeepingNasheDetstvo.Server.Services
             Subjects = db.GetCollection<Subject>(nameof(Subjects));
             Sessions = db.GetCollection<Session>(nameof(Sessions));
             Credentials = db.GetCollection<Credential>(nameof(Credentials));
+            Places = db.GetCollection<Place>(nameof(Places));
             
             AddDefaults(lifetime.ApplicationStopping);
         }
