@@ -1,6 +1,5 @@
 using BookkeepingNasheDetstvo.Server.Models;
 using BookkeepingNasheDetstvo.Server.Services;
-using BookkeepingNasheDetstvo.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -10,7 +9,9 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using BookkeepingNasheDetstvo.Server.Attributes;
 using BookkeepingNasheDetstvo.Server.Extensions;
+using BookkeepingNasheDetstvo.Server.Models.Mvc;
 using MlkPwgen;
 
 namespace BookkeepingNasheDetstvo.Server.Controllers
@@ -27,7 +28,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         }
 
         [HttpPost("authorize")]
-        public async Task<ActionResult<string>> Authorize([FromBody] LogInModel model)
+        public async Task<ActionResult<string>> Authorize([FromBody] AuthorizeModel model)
         {
             var teacher = await _context.Teachers.Find(t => t.PhoneNumber == model.Login).SingleOrDefaultAsync();
             if (teacher == default)
@@ -80,13 +81,19 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("teacher")]
         [ValidateAccessToken]
-        public async Task<ActionResult<string>> PostTeacher([FromBody] Teacher teacher)
+        public async Task<ActionResult<string>> PostTeacher([FromBody] Teacher teacher, Teacher current)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
+
+            var affectedIsOwner = await _context.Teachers.Find(t => t.Id == teacher.Id)
+                .Project(t => t.IsOwner).SingleOrDefaultAsync();
+            if (affectedIsOwner)
+                return StatusCode(403);
             
             if (teacher.Id == null)
                 teacher.Id = ObjectId.GenerateNewId().ToString();
+            
             await _context.Teachers.ReplaceOneAsync(t => t.Id == teacher.Id, teacher, new UpdateOptions { IsUpsert = true });
             return teacher.Id;
         }
@@ -127,10 +134,10 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("child")]
         [ValidateAccessToken]
-        public async Task<ActionResult<string>> PostChild([FromBody] Child child)
+        public async Task<ActionResult<string>> PostChild([FromBody] Child child, Teacher current)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
+            if (!current.EditChildren)
+                return StatusCode(403);
             
             if (child.Id == null)
                 child.Id = ObjectId.GenerateNewId().ToString();
@@ -152,10 +159,17 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("teacher/delete")]
         [ValidateAccessToken]
-        public async Task<ActionResult> DeleteTeacher([FromBody] string id)
+        public async Task<ActionResult> DeleteTeacher([FromBody] string id, Teacher current)
         {
             if (id == null)
                 return BadRequest();
+
+            var affected = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{IsOwner:1}").SingleOrDefaultAsync();
+            if (affected == default)
+                return NotFound();
+
+            if (!current.EditTeachers || affected.IsOwner)
+                return StatusCode(403);
             
             await _context.Teachers.DeleteOneAsync(c => c.Id == id);
             await _context.Subjects.DeleteManyAsync(s => s.Owner.Id == id);
@@ -179,7 +193,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("subject/removeChild")]
         [ValidateAccessToken]
-        public async Task<ActionResult> RemoveSubjectChild([FromBody] RemoveChildAction model)
+        public async Task<ActionResult> RemoveSubjectChild([FromBody] RemoveSubjectChildModel model)
         {
             Expression<Func<Subject, bool>> filterExpr = s => s.Date == model.Date && s.Time == model.Time
                 && s.Owner.Id == model.OwnerId;
@@ -196,12 +210,12 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("subject/addChild")]
         [ValidateAccessToken]
-        public async Task<ActionResult> AddSubjectChild([FromBody] AddChildAction model)
+        public async Task<ActionResult> AddSubjectChild([FromBody] AddSubjectChildModel model)
         {
-            Expression<Func<Subject, bool>> filterExpr = s => s.Date == model.Date && s.Time == model.Time
-                && s.Owner.Id == model.Owner.Id;
-            bool subjectExists = await _context.Subjects.Find(filterExpr).AnyAsync();
-            if (!subjectExists)
+            var id = await _context.Subjects.Find(s => s.Date == model.Date && s.Time == model.Time
+                && s.Owner.Id == model.Owner.Id).Project(s => s.Id).SingleOrDefaultAsync();
+            
+            if (id == default)
                 await _context.Subjects.InsertOneAsync(new Subject
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
@@ -210,95 +224,104 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                     Time = model.Time,
                     Owner = model.Owner
                 });
-            else await _context.Subjects.UpdateOneAsync(filterExpr, Builders<Subject>.Update.Push(s => s.Children, model.Child));
+            else await _context.Subjects.UpdateOneAsync(s => s.Id == id, Builders<Subject>.Update.Push(s => s.Children, model.Child));
             return Ok();
         }
 
-        [HttpGet("statistic/{type:required}/{id:required}")]
+        [HttpGet("statistic/child/{id:required}")]
         [ValidateAccessToken]
-        public async Task<ActionResult<Statistic>> GetStatisticsFor([FromQuery] string from, [FromQuery] string to, string type, string id)
+        public async Task<ActionResult<Statistic>> GetChildStatistic(DateRangeModel model, string id)
         {
-            if (from == null || to == null || (type != "teacher" && type != "child") || !DateTime.TryParseExact(from, "d-M-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fromValue) || !DateTime.TryParseExact(to, "d-M-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var toValue))
+            if (!DateTime.TryParseExact(model.From, "d-M-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out var fromValue) || !DateTime.TryParseExact(model.To, "d-M-yyyy", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var toValue))
                 return BadRequest();
             
-            if (type == "teacher")
+            var child = await _context.Children.Find(t => t.Id == id)
+                .Project<Child>("{PerHour:1, FirstName:1, LastName: 1}").SingleOrDefaultAsync();
+            if (child == default)
+                return NotFound();
+
+            var subjects = await _context.Subjects.Find(FilterDefinition<Subject>.Empty)
+                .Project<Subject>("{Children:1,Owner:1,Date:1,_id:0}").ToListAsync();
+            var totalHoursByTeachers = new Dictionary<string, (string name, int total)>();
+            var totalHours = 0;
+            foreach (var subject in subjects)
             {
-                var teacher = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{PerHour:1, FirstName:1, LastName:1}").SingleOrDefaultAsync();
-                if (teacher == default)
-                    return NotFound();
+                var childInSubject = subject.Children.Find(c => c.Id == child.Id);
+                if (childInSubject == default)
+                    continue;
 
-                var subjects = await _context.Subjects.Find(s => s.Owner.Id == teacher.Id).Project<Subject>("{Date:1,Children:1,_id:0}").ToListAsync();
-                var totalHoursByChildren = new Dictionary<string, (string name, int total)>();
-                var totalHours = 0;
-                foreach (var subject in subjects)
-                {
-                    if (!DateTime.TryParse(subject.Date, out var subjectDate) || subjectDate < fromValue ||
-                        subjectDate > toValue) continue;
-                    
-                    foreach (var child in subject.Children)
-                    {
-                        if (totalHoursByChildren.TryGetValue(child.Id, out var value))
-                            totalHoursByChildren[child.Id] = (value.name, value.total + 1);
-                        else totalHoursByChildren.Add(child.Id, (child.Name, 1));
-                        ++totalHours;
-                    }
-                }
-
-                var children = await _context.Children.Find(FilterDefinition<Child>.Empty).Project<Child>("{Icon:1}").ToListAsync();
-                var statistic = new Statistic
-                {
-                    PerHour = teacher.PerHour,
-                    SourceItems = totalHoursByChildren.Select(pair => new SourceItem
-                    {
-                        TotalHours = pair.Value.total,
-                        Id = pair.Key,
-                        Name = pair.Value.name,
-                        ImageUrl = children.Find(c => c.Id == pair.Key)?.ImageUrl ?? string.Empty
-                    }).ToList(),
-                    TotalHours = totalHours,
-                    Name = $"{teacher.LastName} {teacher.FirstName}".Trim()
-                };
-                return statistic;
+                if (!DateTime.TryParse(subject.Date, out var subjectDate) || subjectDate < fromValue ||
+                    subjectDate > toValue) continue;
+                
+                if (totalHoursByTeachers.TryGetValue(subject.Owner.Id, out var value))
+                    totalHoursByTeachers[subject.Owner.Id] = (value.name, value.total + 1);
+                else totalHoursByTeachers.Add(subject.Owner.Id, (subject.Owner.Name, 1));
+                ++totalHours;
             }
-            else
+            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).Project<Teacher>("{Icon:1}").ToListAsync();
+            var statistic = new Statistic
             {
-                var child = await _context.Children.Find(t => t.Id == id).Project<Child>("{PerHour:1, FirstName:1, LastName: 1}").SingleOrDefaultAsync();
-                if (child == default)
-                    return NotFound();
-
-                var subjects = await _context.Subjects.Find(FilterDefinition<Subject>.Empty).Project<Subject>("{Children:1,Owner:1,Date:1,_id:0}").ToListAsync();
-                var totalHoursByTeachers = new Dictionary<string, (string name, int total)>();
-                var totalHours = 0;
-                foreach (var subject in subjects)
+                PerHour = child.PerHour,
+                SourceItems = totalHoursByTeachers.Select(pair => new SourceItem
                 {
-                    var childInSubject = subject.Children.Find(c => c.Id == child.Id);
-                    if (childInSubject == default)
-                        continue;
+                    TotalHours = pair.Value.total,
+                    Id = pair.Key,
+                    Name = pair.Value.name,
+                    ImageUrl = teachers.Find(c => c.Id == pair.Key)?.ImageUrl ?? string.Empty
+                }).ToList(),
+                TotalHours = totalHours,
+                Name = $"{child.LastName} {child.FirstName}".Trim()
+            };
+            return statistic;
+        }
+        
+        [HttpGet("statistic/teacher/{id:required}")]
+        [ValidateAccessToken]
+        public async Task<ActionResult<Statistic>> GetTeacherStatistic(DateRangeModel model, string id)
+        {
+            if (!DateTime.TryParseExact(model.From, "d-M-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out var fromValue) || !DateTime.TryParseExact(model.To, "d-M-yyyy", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var toValue))
+                return BadRequest();
+            
+            var teacher = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{PerHour:1, FirstName:1, LastName:1}").SingleOrDefaultAsync();
+            if (teacher == default)
+                return NotFound();
 
-                    if (!DateTime.TryParse(subject.Date, out var subjectDate) || subjectDate < fromValue ||
-                        subjectDate > toValue) continue;
+            var subjects = await _context.Subjects.Find(s => s.Owner.Id == teacher.Id).Project<Subject>("{Date:1,Children:1,_id:0}").ToListAsync();
+            var totalHoursByChildren = new Dictionary<string, (string name, int total)>();
+            var totalHours = 0;
+            foreach (var subject in subjects)
+            {
+                if (!DateTime.TryParse(subject.Date, out var subjectDate) || subjectDate < fromValue ||
+                    subjectDate > toValue) continue;
                     
-                    if (totalHoursByTeachers.TryGetValue(subject.Owner.Id, out var value))
-                        totalHoursByTeachers[subject.Owner.Id] = (value.name, value.total + 1);
-                    else totalHoursByTeachers.Add(subject.Owner.Id, (subject.Owner.Name, 1));
+                foreach (var child in subject.Children)
+                {
+                    if (totalHoursByChildren.TryGetValue(child.Id, out var value))
+                        totalHoursByChildren[child.Id] = (value.name, value.total + 1);
+                    else totalHoursByChildren.Add(child.Id, (child.Name, 1));
                     ++totalHours;
                 }
-                var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).Project<Teacher>("{Icon:1}").ToListAsync();
-                var statistic = new Statistic
-                {
-                    PerHour = child.PerHour,
-                    SourceItems = totalHoursByTeachers.Select(pair => new SourceItem
-                    {
-                        TotalHours = pair.Value.total,
-                        Id = pair.Key,
-                        Name = pair.Value.name,
-                        ImageUrl = teachers.Find(c => c.Id == pair.Key)?.ImageUrl ?? string.Empty
-                    }).ToList(),
-                    TotalHours = totalHours,
-                    Name = $"{child.LastName} {child.FirstName}".Trim()
-                };
-                return statistic;
             }
+
+            var children = await _context.Children.Find(FilterDefinition<Child>.Empty).Project<Child>("{Icon:1}").ToListAsync();
+            var statistic = new Statistic
+            {
+                PerHour = teacher.PerHour,
+                SourceItems = totalHoursByChildren.Select(pair => new SourceItem
+                {
+                    TotalHours = pair.Value.total,
+                    Id = pair.Key,
+                    Name = pair.Value.name,
+                    ImageUrl = children.Find(c => c.Id == pair.Key)?.ImageUrl ?? string.Empty
+                }).ToList(),
+                TotalHours = totalHours,
+                Name = $"{teacher.LastName} {teacher.FirstName}".Trim()
+            };
+            return statistic;
         }
     }
 }
