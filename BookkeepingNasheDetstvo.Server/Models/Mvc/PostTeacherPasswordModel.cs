@@ -1,4 +1,4 @@
-namespace BookkeepingNasheDetstvo.Server.Models
+namespace BookkeepingNasheDetstvo.Server.Models.Mvc
 {
     public sealed class PostTeacherPasswordModel
     {

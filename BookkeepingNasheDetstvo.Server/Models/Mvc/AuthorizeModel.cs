@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BookkeepingNasheDetstvo.Server.Models
+namespace BookkeepingNasheDetstvo.Server.Models.Mvc
 {
-    public class LogInModel
+    public class AuthorizeModel
     {
         [Required(AllowEmptyStrings = false)]
         public string Login { get; set; }
