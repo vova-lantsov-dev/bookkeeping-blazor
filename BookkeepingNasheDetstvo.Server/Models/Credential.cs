@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace BookkeepingNasheDetstvo.Shared
+namespace BookkeepingNasheDetstvo.Server.Models
 {
     public sealed class Credential
     {

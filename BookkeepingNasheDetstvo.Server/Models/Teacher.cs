@@ -1,9 +1,9 @@
-using BookkeepingNasheDetstvo.Shared.Serializers;
+using System.ComponentModel.DataAnnotations;
+using BookkeepingNasheDetstvo.Server.Serializers;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System.ComponentModel.DataAnnotations;
 
-namespace BookkeepingNasheDetstvo.Shared
+namespace BookkeepingNasheDetstvo.Server.Models
 {
     public class Teacher
     {
