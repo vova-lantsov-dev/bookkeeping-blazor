@@ -2,7 +2,7 @@ using System;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 
-namespace BookkeepingNasheDetstvo.Shared.Serializers
+namespace BookkeepingNasheDetstvo.Server.Serializers
 {
     public class CustomMongoDecimalSerializer : SerializerBase<decimal>
     {
