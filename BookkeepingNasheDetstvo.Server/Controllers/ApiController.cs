@@ -1,18 +1,17 @@
-using BookkeepingNasheDetstvo.Server.Models;
-using BookkeepingNasheDetstvo.Server.Services;
-using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using BookkeepingNasheDetstvo.Server.Attributes;
 using BookkeepingNasheDetstvo.Server.Extensions;
+using BookkeepingNasheDetstvo.Server.Models;
 using BookkeepingNasheDetstvo.Server.Models.Mvc;
+using BookkeepingNasheDetstvo.Server.Services;
+using Microsoft.AspNetCore.Mvc;
 using MlkPwgen;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace BookkeepingNasheDetstvo.Server.Controllers
 {
@@ -229,97 +228,105 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             return Ok();
         }
 
-        [HttpGet("statistic/child/{id:required}")]
+        [HttpGet("statistic/child/{childId:required}")]
         [ValidateAccessToken]
-        public async Task<ActionResult<Statistic>> GetChildStatistic(DateRangeModel model, string id)
+        public async Task<ActionResult<object>> GetChildStatistic(DateRangeModel model, string childId, Teacher current)
         {
-            if (!DateTime.TryParseExact(model.From, "d-M-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                    out var fromValue) || !DateTime.TryParseExact(model.To, "d-M-yyyy", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out var toValue))
-                return BadRequest();
+            if (!current.ReadGlobalStatistic && !current.IsOwner)
+                return StatusCode(403);
             
-            var child = await _context.Children.Find(t => t.Id == id)
-                .Project<Child>("{PerHour:1, FirstName:1, LastName: 1}").SingleOrDefaultAsync();
+            var child = await _context.Children.Find(t => t.Id == childId).SingleOrDefaultAsync();
             if (child == default)
                 return NotFound();
 
             var subjects = await _context.Subjects.Find(FilterDefinition<Subject>.Empty)
                 .Project<Subject>("{Children:1,Owner:1,Date:1,_id:0}").ToListAsync();
             var totalHoursByTeachers = new Dictionary<string, (string name, int total)>();
-            var totalHours = 0;
+            var totalHoursGlobal = 0;
+            
             foreach (var subject in subjects)
             {
                 var childInSubject = subject.Children.Find(c => c.Id == child.Id);
                 if (childInSubject == default)
                     continue;
 
-                if (!DateTime.TryParse(subject.Date, out var subjectDate) || subjectDate < fromValue ||
-                    subjectDate > toValue) continue;
+                if (!DateTime.TryParse(subject.Date, out var subjectDate) ||
+                    subjectDate < model.From ||
+                    subjectDate > model.To) continue;
                 
                 if (totalHoursByTeachers.TryGetValue(subject.Owner.Id, out var value))
                     totalHoursByTeachers[subject.Owner.Id] = (value.name, value.total + 1);
                 else totalHoursByTeachers.Add(subject.Owner.Id, (subject.Owner.Name, 1));
-                ++totalHours;
+                ++totalHoursGlobal;
             }
-            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).Project<Teacher>("{Icon:1}").ToListAsync();
-            var statistic = new Statistic
+            
+            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).Project<Teacher>("{ImageUrl:1}").ToListAsync();
+            var statistic = new
             {
-                PerHour = child.PerHour,
-                SourceItems = totalHoursByTeachers.Select(pair => new SourceItem
+                child.PerHour,
+                child.PerHourGroup,
+                SourceItems = totalHoursByTeachers.Select(pair =>
                 {
-                    TotalHours = pair.Value.total,
-                    Id = pair.Key,
-                    Name = pair.Value.name,
-                    ImageUrl = teachers.Find(c => c.Id == pair.Key)?.ImageUrl ?? string.Empty
+                    var (id, (name, totalHours)) = pair;
+                    return new
+                    {
+                        totalHours, id, name,
+                        ImageUrl = teachers.Find(t => t.Id == id)?.ImageUrl ?? string.Empty
+                    };
                 }).ToList(),
-                TotalHours = totalHours,
+                TotalHours = totalHoursGlobal,
                 Name = $"{child.LastName} {child.FirstName}".Trim()
             };
             return statistic;
         }
         
-        [HttpGet("statistic/teacher/{id:required}")]
+        [HttpGet("statistic/teacher/{teacherId:required}")]
         [ValidateAccessToken]
-        public async Task<ActionResult<Statistic>> GetTeacherStatistic(DateRangeModel model, string id)
+        public async Task<ActionResult<object>> GetTeacherStatistic(DateRangeModel model, string teacherId, Teacher current)
         {
-            if (!DateTime.TryParseExact(model.From, "d-M-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                    out var fromValue) || !DateTime.TryParseExact(model.To, "d-M-yyyy", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out var toValue))
-                return BadRequest();
+            if (current.Id != teacherId && !current.ReadGlobalStatistic && !current.IsOwner)
+                return StatusCode(403);
             
-            var teacher = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{PerHour:1, FirstName:1, LastName:1}").SingleOrDefaultAsync();
+            var teacher = current.Id == teacherId
+                ? current
+                : await _context.Teachers.Find(t => t.Id == teacherId).SingleOrDefaultAsync();
             if (teacher == default)
                 return NotFound();
 
-            var subjects = await _context.Subjects.Find(s => s.Owner.Id == teacher.Id).Project<Subject>("{Date:1,Children:1,_id:0}").ToListAsync();
+            var subjects = await _context.Subjects.Find(s => s.Owner.Id == teacher.Id)
+                .Project<Subject>("{Date:1,Children:1,_id:0}").ToListAsync();
             var totalHoursByChildren = new Dictionary<string, (string name, int total)>();
-            var totalHours = 0;
+            var totalHoursGlobal = 0;
+            
             foreach (var subject in subjects)
             {
-                if (!DateTime.TryParse(subject.Date, out var subjectDate) || subjectDate < fromValue ||
-                    subjectDate > toValue) continue;
+                var subjectDate = DateTime.Parse(subject.Date);
+                if (subjectDate < model.From || subjectDate > model.To) continue;
                     
                 foreach (var child in subject.Children)
                 {
                     if (totalHoursByChildren.TryGetValue(child.Id, out var value))
                         totalHoursByChildren[child.Id] = (value.name, value.total + 1);
                     else totalHoursByChildren.Add(child.Id, (child.Name, 1));
-                    ++totalHours;
+                    
+                    ++totalHoursGlobal;
                 }
             }
 
-            var children = await _context.Children.Find(FilterDefinition<Child>.Empty).Project<Child>("{Icon:1}").ToListAsync();
-            var statistic = new Statistic
+            var children = await _context.Children.Find(FilterDefinition<Child>.Empty).Project<Child>("{ImageUrl:1}").ToListAsync();
+            var statistic = new
             {
-                PerHour = teacher.PerHour,
-                SourceItems = totalHoursByChildren.Select(pair => new SourceItem
+                teacher.PerHour, teacher.PerHourGroup,
+                SourceItems = totalHoursByChildren.Select(pair =>
                 {
-                    TotalHours = pair.Value.total,
-                    Id = pair.Key,
-                    Name = pair.Value.name,
-                    ImageUrl = children.Find(c => c.Id == pair.Key)?.ImageUrl ?? string.Empty
+                    var (id, (name, totalHours)) = pair;
+                    return new
+                    {
+                        totalHours, id, name,
+                        ImageUrl = children.Find(c => c.Id == id)?.ImageUrl ?? string.Empty
+                    };
                 }).ToList(),
-                TotalHours = totalHours,
+                TotalHours = totalHoursGlobal,
                 Name = $"{teacher.LastName} {teacher.FirstName}".Trim()
             };
             return statistic;
