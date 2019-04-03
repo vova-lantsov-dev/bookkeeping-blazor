@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookkeepingNasheDetstvo.Client\BookkeepingNasheDetstvo.Client.csproj" />
-    <ProjectReference Include="..\BookkeepingNasheDetstvo.Shared\BookkeepingNasheDetstvo.Shared.csproj" />
   </ItemGroup>
 
 </Project>
