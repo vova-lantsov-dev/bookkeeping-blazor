@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BookkeepingNasheDetstvo.Shared.Extensions
+namespace BookkeepingNasheDetstvo.Server.Extensions
 {
     public static class TimeExtensions
     {
