@@ -10,6 +10,8 @@ namespace BookkeepingNasheDetstvo.Server.Models
         
         public decimal PerHour { get; set; }
         
+        public decimal PerHourGroup { get; set; }
+        
         public List<SourceItem> SourceItems { get; set; }
     }
 
