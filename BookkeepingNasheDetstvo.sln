@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookkeepingNasheDetstvo.Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookkeepingNasheDetstvo.Client", "BookkeepingNasheDetstvo.Client\BookkeepingNasheDetstvo.Client.csproj", "{2D183D56-B9AA-47EB-9764-B294E0F3E9BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookkeepingNasheDetstvo.Shared", "BookkeepingNasheDetstvo.Shared\BookkeepingNasheDetstvo.Shared.csproj", "{D2F26360-C6FA-4B4C-BBAD-DF077E0BF978}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{2D183D56-B9AA-47EB-9764-B294E0F3E9BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D183D56-B9AA-47EB-9764-B294E0F3E9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D183D56-B9AA-47EB-9764-B294E0F3E9BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D2F26360-C6FA-4B4C-BBAD-DF077E0BF978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2F26360-C6FA-4B4C-BBAD-DF077E0BF978}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D2F26360-C6FA-4B4C-BBAD-DF077E0BF978}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D2F26360-C6FA-4B4C-BBAD-DF077E0BF978}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

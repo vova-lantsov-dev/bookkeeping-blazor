@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using BookkeepingNasheDetstvo.Server.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
-namespace BookkeepingNasheDetstvo.Server.Services
+namespace BookkeepingNasheDetstvo.Server.Attributes
 {
     public class ValidateAccessTokenAttribute : Attribute, IAsyncActionFilter
     {
