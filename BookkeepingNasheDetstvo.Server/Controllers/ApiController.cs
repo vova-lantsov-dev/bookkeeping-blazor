@@ -28,6 +28,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         }
 
         [HttpPost("authorize")]
+        [ValidateModel]
         public async Task<ActionResult<string>> Authorize([FromBody] AuthorizeModel model)
         {
             var teacher = await _context.Teachers.Find(t => t.PhoneNumber == model.Login).SingleOrDefaultAsync();
@@ -81,11 +82,9 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("teacher")]
         [ValidateAccessToken]
+        [ValidateModel]
         public async Task<ActionResult<string>> PostTeacher([FromBody] Teacher teacher, Teacher current)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
             var affectedIsOwner = await _context.Teachers.Find(t => t.Id == teacher.Id)
                 .Project(t => t.IsOwner).SingleOrDefaultAsync();
             if (affectedIsOwner)
@@ -100,6 +99,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("teacher/password")]
         [ValidateAccessToken]
+        [ValidateModel]
         public async Task<ActionResult> PostTeacherPassword([FromBody] PostTeacherPasswordModel model, Teacher current)
         {
             var affected = await _context.Teachers.Find(t => t.Id == model.TeacherId).SingleOrDefaultAsync();
@@ -134,6 +134,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpPost("child")]
         [ValidateAccessToken]
+        [ValidateModel]
         public async Task<ActionResult<string>> PostChild([FromBody] Child child, Teacher current)
         {
             if (!current.EditChildren)
