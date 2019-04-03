@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace BookkeepingNasheDetstvo.Server.Models
+namespace BookkeepingNasheDetstvo.Server.Models.Mvc
 {
     public sealed class IdNamePair
     {
