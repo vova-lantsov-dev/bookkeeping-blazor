@@ -34,8 +34,6 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                 return NotFound();
 
             var credential = await _context.Credentials.Find(c => c.Id == teacher.Id).SingleAsync();
-            if (credential == default)
-                return NotFound();
 
             if (credential.PasswordHash != PasswordExtensions.HashPassword(model.Password, credential.Salt))
                 return StatusCode(403);
@@ -104,7 +102,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             if (affected == default)
                 return NotFound();
             
-            if (!current.IsOwner && model.TeacherId != current.Id && (affected.IsOwner || !current.EditTeachers))
+            if (!current.IsOwner && model.TeacherId != current.Id)
                 return StatusCode(403);
 
             var newSalt = PasswordGenerator.Generate(8);
