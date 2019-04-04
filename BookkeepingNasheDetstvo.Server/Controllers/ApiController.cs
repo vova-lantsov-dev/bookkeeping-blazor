@@ -20,10 +20,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
     {
         private readonly BookkeepingContext _context;
 
-        public ApiController(BookkeepingContext context)
-        {
-            _context = context;
-        }
+        public ApiController(BookkeepingContext context) => _context = context;
 
         [HttpPost("authorize")]
         [ValidateModel]
@@ -52,34 +49,28 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                 Token = token
             };
             await _context.Sessions.InsertOneAsync(session);
+            
             return token;
         }
 
         [HttpGet("current")]
         [ValidateAccessToken]
-        public ActionResult<Teacher> Current(Teacher current)
-        {
-            return current;
-        }
+        public ActionResult<Teacher> Current(Teacher current) => current;
 
         [HttpGet("teachers")]
         [ValidateAccessToken]
-        public async Task<ActionResult<List<Teacher>>> ListTeachers()
-        {
-            return await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).ToListAsync();
-        }
+        public Task<List<Teacher>> ListTeachers() =>
+            _context.Teachers.Find(FilterDefinition<Teacher>.Empty).ToListAsync();
 
         [HttpGet("teacher/{id:required}")]
         [ValidateAccessToken]
-        public async Task<ActionResult<Teacher>> GetTeacher(string id)
-        {
-            return await _context.Teachers.Find(t => t.Id == id).FirstOrDefaultAsync();
-        }
+        public Task<Teacher> GetTeacher(string id) =>
+            _context.Teachers.Find(t => t.Id == id).SingleOrDefaultAsync();
 
         [HttpPost("teacher")]
         [ValidateAccessToken]
         [ValidateModel]
-        public async Task<ActionResult<string>> PostTeacher([FromBody] Teacher teacher, Teacher current)
+        public async Task<ActionResult<string>> PostTeacher([FromBody] Teacher teacher)
         {
             var affectedIsOwner = await _context.Teachers.Find(t => t.Id == teacher.Id)
                 .Project(t => t.IsOwner).SingleOrDefaultAsync();
@@ -89,7 +80,9 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             if (teacher.Id == null)
                 teacher.Id = ObjectId.GenerateNewId().ToString();
             
-            await _context.Teachers.ReplaceOneAsync(t => t.Id == teacher.Id, teacher, new UpdateOptions { IsUpsert = true });
+            await _context.Teachers.ReplaceOneAsync(t => t.Id == teacher.Id, teacher,
+                new UpdateOptions {IsUpsert = true});
+            
             return teacher.Id;
         }
 
@@ -116,17 +109,11 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
 
         [HttpGet("children")]
         [ValidateAccessToken]
-        public async Task<ActionResult<List<Child>>> ListChildren()
-        {
-            return await _context.Children.Find(FilterDefinition<Child>.Empty).ToListAsync();
-        }
+        public Task<List<Child>> ListChildren() => _context.Children.Find(FilterDefinition<Child>.Empty).ToListAsync();
 
         [HttpGet("child/{id:required}")]
         [ValidateAccessToken]
-        public async Task<ActionResult<Child>> GetChild(string id)
-        {
-            return await _context.Children.Find(c => c.Id == id).FirstOrDefaultAsync();
-        }
+        public Task<Child> GetChild(string id) => _context.Children.Find(c => c.Id == id).SingleOrDefaultAsync();
 
         [HttpPost("child")]
         [ValidateAccessToken]
@@ -138,7 +125,9 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             
             if (child.Id == null)
                 child.Id = ObjectId.GenerateNewId().ToString();
-            await _context.Children.ReplaceOneAsync(c => c.Id == child.Id, child, new UpdateOptions { IsUpsert = true });
+            
+            await _context.Children.ReplaceOneAsync(c => c.Id == child.Id, child, new UpdateOptions {IsUpsert = true});
+            
             return child.Id;
         }
 
@@ -147,7 +136,9 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         public async Task<ActionResult> DeleteChild(string id)
         {
             await _context.Children.DeleteOneAsync(c => c.Id == id);
-            await _context.Subjects.UpdateManyAsync(FilterDefinition<Subject>.Empty, Builders<Subject>.Update.PullFilter(s => s.Children, c => c.Id == id));
+            await _context.Subjects.UpdateManyAsync(FilterDefinition<Subject>.Empty,
+                Builders<Subject>.Update.PullFilter(s => s.Children, c => c.Id == id));
+            
             return Ok();
         }
 
@@ -155,7 +146,8 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         [ValidateAccessToken]
         public async Task<ActionResult> DeleteTeacher(string id, Teacher current)
         {
-            var affected = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{IsOwner:1}").SingleOrDefaultAsync();
+            var affected = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{IsOwner:1}")
+                .SingleOrDefaultAsync();
             if (affected == default)
                 return NotFound();
 
@@ -174,14 +166,26 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         [ValidateAccessToken]
         public async Task<ActionResult<object>> ListSubjects([FromQuery] string date)
         {
-            var children = await _context.Children.Find(FilterDefinition<Child>.Empty).Project<Child>("{FirstName:1, LastName:1}").ToListAsync();
-            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).Project<Teacher>("{FirstName:1, LastName:1}").ToListAsync();
+            var children = await _context.Children.Find(FilterDefinition<Child>.Empty)
+                .Project<Child>("{FirstName:1, LastName:1}").ToListAsync();
+            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty)
+                .Project<Teacher>("{FirstName:1, LastName:1}").ToListAsync();
             var subjects = await _context.Subjects.Find(s => s.Date == date).ToListAsync();
             
             return new
             {
-                children = children.Select(c => new {c.Id, Name = $"{c.LastName} {(c.FirstName.Length == 0 ? string.Empty : $"{c.FirstName[0]}.")}".TrimEnd(' ') }),
-                teachers = teachers.Select(t => new {t.Id, Name = $"{t.LastName} {(t.FirstName.Length == 0 ? string.Empty : $"{t.FirstName[0]}.")}".TrimEnd(' ') }),
+                children = children.Select(c =>
+                {
+                    var name = $"{c.LastName} {(c.FirstName.Length == 0 ? string.Empty : $"{c.FirstName[0]}.")}"
+                        .TrimEnd(' ');
+                    return new { c.Id, name };
+                }),
+                teachers = teachers.Select(t =>
+                {
+                    var name = $"{t.LastName} {(t.FirstName.Length == 0 ? string.Empty : $"{t.FirstName[0]}.")}"
+                        .TrimEnd(' ');
+                    return new { t.Id, name };
+                }),
                 subjects
             };
         }
@@ -231,7 +235,8 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                     IsConsultation = model.IsConsultation,
                     PlaceIdentifier = model.PlaceIdentifier
                 });
-            else await _context.Subjects.UpdateOneAsync(s => s.Id == id, Builders<Subject>.Update.Push(s => s.Children, model.Child));
+            else await _context.Subjects.UpdateOneAsync(s => s.Id == id,
+                Builders<Subject>.Update.Push(s => s.Children, model.Child));
             
             return Ok();
         }
