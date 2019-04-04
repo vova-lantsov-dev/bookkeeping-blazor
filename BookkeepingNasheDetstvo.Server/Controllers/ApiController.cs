@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using BookkeepingNasheDetstvo.Server.Attributes;
 using BookkeepingNasheDetstvo.Server.Extensions;
@@ -136,7 +135,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         [ValidateModel]
         public async Task<ActionResult<string>> PostChild([FromBody] Child child, Teacher current)
         {
-            if (!current.EditChildren)
+            if (!current.EditChildren && !current.IsOwner)
                 return StatusCode(403);
             
             if (child.Id == null)
@@ -145,76 +144,86 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             return child.Id;
         }
 
-        [HttpPost("child/delete")]
+        [HttpPost("child/delete/{id:required}")]
         [ValidateAccessToken]
-        public async Task<ActionResult> DeleteChild([FromBody] string id)
+        public async Task<ActionResult> DeleteChild(string id)
         {
-            if (id == null)
-                return BadRequest();
-            
             await _context.Children.DeleteOneAsync(c => c.Id == id);
             await _context.Subjects.UpdateManyAsync(FilterDefinition<Subject>.Empty, Builders<Subject>.Update.PullFilter(s => s.Children, c => c.Id == id));
             return Ok();
         }
 
-        [HttpPost("teacher/delete")]
+        [HttpPost("teacher/delete/{id:required}")]
         [ValidateAccessToken]
-        public async Task<ActionResult> DeleteTeacher([FromBody] string id, Teacher current)
+        public async Task<ActionResult> DeleteTeacher(string id, Teacher current)
         {
-            if (id == null)
-                return BadRequest();
-
             var affected = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{IsOwner:1}").SingleOrDefaultAsync();
             if (affected == default)
                 return NotFound();
 
-            if (!current.EditTeachers || affected.IsOwner)
+            if (!current.EditTeachers && !current.IsOwner || affected.IsOwner)
                 return StatusCode(403);
             
             await _context.Teachers.DeleteOneAsync(c => c.Id == id);
             await _context.Subjects.DeleteManyAsync(s => s.Owner.Id == id);
+            await _context.Sessions.DeleteManyAsync(s => s.OwnerId == id);
+            await _context.Credentials.DeleteOneAsync(c => c.Id == id);
+            
             return Ok();
         }
 
         [HttpGet("subjectsModel")]
         [ValidateAccessToken]
-        public async Task<ActionResult<Day>> ListSubjects([FromQuery] string date)
+        public async Task<ActionResult<object>> ListSubjects([FromQuery] string date)
         {
             var children = await _context.Children.Find(FilterDefinition<Child>.Empty).Project<Child>("{FirstName:1, LastName:1}").ToListAsync();
             var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).Project<Teacher>("{FirstName:1, LastName:1}").ToListAsync();
             var subjects = await _context.Subjects.Find(s => s.Date == date).ToListAsync();
-            return new Day
+            
+            return new
             {
-                Children = children.Select(c => new IdNamePair { Id = c.Id, Name = $"{c.LastName} {(c.FirstName.Length == 0 ? string.Empty : $"{c.FirstName[0]}.")}".TrimEnd(' ') }).ToList(),
-                Teachers = teachers.Select(t => new IdNamePair { Id = t.Id, Name = $"{t.LastName} {(t.FirstName.Length == 0 ? string.Empty : $"{t.FirstName[0]}.")}".TrimEnd(' ') }).ToList(),
-                Subjects = subjects
+                children = children.Select(c => new {c.Id, Name = $"{c.LastName} {(c.FirstName.Length == 0 ? string.Empty : $"{c.FirstName[0]}.")}".TrimEnd(' ') }),
+                teachers = teachers.Select(t => new {t.Id, Name = $"{t.LastName} {(t.FirstName.Length == 0 ? string.Empty : $"{t.FirstName[0]}.")}".TrimEnd(' ') }),
+                subjects
             };
         }
 
         [HttpPost("subject/removeChild")]
         [ValidateAccessToken]
-        public async Task<ActionResult> RemoveSubjectChild([FromBody] RemoveSubjectChildModel model)
+        [ValidateModel]
+        public async Task<ActionResult> RemoveSubjectChild([FromBody] RemoveSubjectChildModel model, Teacher current)
         {
-            Expression<Func<Subject, bool>> filterExpr = s => s.Date == model.Date && s.Time == model.Time
-                && s.Owner.Id == model.OwnerId;
-            var updatedChildren = await _context.Subjects.FindOneAndUpdateAsync(filterExpr,
-                Builders<Subject>.Update.PullFilter(s => s.Children, c => c.Id == model.ChildId), new FindOneAndUpdateOptions<Subject, Subject>
+            if (!current.EditSubjects && !current.IsOwner)
+                return StatusCode(403);
+            
+            var updatedChildren = await _context.Subjects.FindOneAndUpdateAsync<Subject>(
+                s => s.Date == model.Date && s.Time == model.Time && s.Owner.Id == model.OwnerId,
+                Builders<Subject>.Update.PullFilter(s => s.Children, c => c.Id == model.ChildId),
+                new FindOneAndUpdateOptions<Subject, Subject>
                 {
-                    Projection = "{Children:1, _id:0}",
+                    Projection = "{Children:1}",
                     ReturnDocument = ReturnDocument.After
                 });
+            
             if (updatedChildren.Children.Count == 0)
-                await _context.Subjects.DeleteOneAsync(filterExpr);
+                await _context.Subjects.DeleteOneAsync(s => s.Id == updatedChildren.Id);
+            
             return Ok();
         }
 
         [HttpPost("subject/addChild")]
         [ValidateAccessToken]
-        public async Task<ActionResult> AddSubjectChild([FromBody] AddSubjectChildModel model)
+        [ValidateModel]
+        public async Task<ActionResult> AddSubjectChild([FromBody] AddSubjectChildModel model, Teacher current)
         {
+            if (!current.EditSubjects && !current.IsOwner)
+                return StatusCode(403);
+            
             var id = await _context.Subjects.Find(s => s.Date == model.Date && s.Time == model.Time
                 && s.Owner.Id == model.Owner.Id).Project(s => s.Id).SingleOrDefaultAsync();
             
+            // TODO place identifier
+            // TODO consultation
             if (id == default)
                 await _context.Subjects.InsertOneAsync(new Subject
                 {
@@ -225,8 +234,11 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                     Owner = model.Owner
                 });
             else await _context.Subjects.UpdateOneAsync(s => s.Id == id, Builders<Subject>.Update.Push(s => s.Children, model.Child));
+            
             return Ok();
         }
+        
+        // TODO update subject child method
 
         [HttpGet("statistic/child/{childId:required}")]
         [ValidateAccessToken]
@@ -257,25 +269,23 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                 if (totalHoursByTeachers.TryGetValue(subject.Owner.Id, out var value))
                     totalHoursByTeachers[subject.Owner.Id] = (value.name, value.total + 1);
                 else totalHoursByTeachers.Add(subject.Owner.Id, (subject.Owner.Name, 1));
+                
                 ++totalHoursGlobal;
             }
             
-            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty).Project<Teacher>("{ImageUrl:1}").ToListAsync();
+            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty)
+                .Project<Teacher>("{ImageUrl:1}").ToListAsync();
             var statistic = new
             {
-                child.PerHour,
-                child.PerHourGroup,
-                SourceItems = totalHoursByTeachers.Select(pair =>
+                child.PerHour, child.PerHourGroup,
+                sourceItems = totalHoursByTeachers.Select(pair =>
                 {
                     var (id, (name, totalHours)) = pair;
-                    return new
-                    {
-                        totalHours, id, name,
-                        ImageUrl = teachers.Find(t => t.Id == id)?.ImageUrl ?? string.Empty
-                    };
-                }).ToList(),
-                TotalHours = totalHoursGlobal,
-                Name = $"{child.LastName} {child.FirstName}".Trim()
+                    var imageUrl = teachers.Find(t => t.Id == id)?.ImageUrl ?? string.Empty;
+                    return new { totalHours, id, name, imageUrl };
+                }),
+                totalHours = totalHoursGlobal,
+                name = $"{child.LastName} {child.FirstName}".Trim()
             };
             return statistic;
         }
@@ -314,22 +324,18 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             }
 
             var children = await _context.Children.Find(FilterDefinition<Child>.Empty).Project<Child>("{ImageUrl:1}").ToListAsync();
-            var statistic = new
+            return new
             {
                 teacher.PerHour, teacher.PerHourGroup,
-                SourceItems = totalHoursByChildren.Select(pair =>
+                sourceItems = totalHoursByChildren.Select(pair =>
                 {
                     var (id, (name, totalHours)) = pair;
-                    return new
-                    {
-                        totalHours, id, name,
-                        ImageUrl = children.Find(c => c.Id == id)?.ImageUrl ?? string.Empty
-                    };
-                }).ToList(),
-                TotalHours = totalHoursGlobal,
-                Name = $"{teacher.LastName} {teacher.FirstName}".Trim()
+                    var imageUrl = children.Find(c => c.Id == id)?.ImageUrl ?? string.Empty;
+                    return new { totalHours, id, name, imageUrl };
+                }),
+                totalHours = totalHoursGlobal,
+                name = $"{teacher.LastName} {teacher.FirstName}".Trim()
             };
-            return statistic;
         }
     }
 }
