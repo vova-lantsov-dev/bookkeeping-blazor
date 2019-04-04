@@ -11,5 +11,9 @@ namespace BookkeepingNasheDetstvo.Server.Models.Mvc
         [Required] public IdNamePair Owner { get; set; }
         
         [Required] public IdNamePair Child { get; set; }
+        
+        public bool IsConsultation { get; set; }
+        
+        [Required] public string PlaceIdentifier { get; set; }
     }
 }

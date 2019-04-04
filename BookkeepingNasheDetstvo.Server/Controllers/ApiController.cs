@@ -222,8 +222,6 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             var id = await _context.Subjects.Find(s => s.Date == model.Date && s.Time == model.Time
                 && s.Owner.Id == model.Owner.Id).Project(s => s.Id).SingleOrDefaultAsync();
             
-            // TODO place identifier
-            // TODO consultation
             if (id == default)
                 await _context.Subjects.InsertOneAsync(new Subject
                 {
@@ -231,7 +229,9 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
                     Children = new List<IdNamePair> { model.Child },
                     Date = model.Date,
                     Time = model.Time,
-                    Owner = model.Owner
+                    Owner = model.Owner,
+                    IsConsultation = model.IsConsultation,
+                    PlaceIdentifier = model.PlaceIdentifier
                 });
             else await _context.Subjects.UpdateOneAsync(s => s.Id == id, Builders<Subject>.Update.Push(s => s.Children, model.Child));
             
