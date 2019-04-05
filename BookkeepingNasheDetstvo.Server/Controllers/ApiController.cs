@@ -162,32 +162,41 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             return Ok();
         }
 
-        [HttpGet("subjectsModel")]
+        [HttpGet("subjects")]
         [ValidateAccessToken]
-        public async Task<ActionResult<object>> ListSubjects([FromQuery] string date)
+        public async Task<ActionResult<List<Subject>>> ListSubjects([FromQuery] string date)
+        {
+            return await _context.Subjects.Find(s => s.Date == date).ToListAsync();
+        }
+
+        [HttpGet("subjects/teachers")]
+        [ValidateAccessToken]
+        public async Task<object> ListTeachersForSubjects()
+        {
+            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty)
+                .Project<Teacher>("{FirstName:1, LastName:1}").ToListAsync();
+
+            return teachers.Select(t =>
+            {
+                var name = $"{t.LastName} {(t.FirstName.Length == 0 ? string.Empty : $"{t.FirstName[0]}.")}"
+                    .TrimEnd(' ');
+                return new { t.Id, name };
+            });
+        }
+
+        [HttpGet("subjects/children")]
+        [ValidateAccessToken]
+        public async Task<object> ListChildrenForSubjects()
         {
             var children = await _context.Children.Find(FilterDefinition<Child>.Empty)
                 .Project<Child>("{FirstName:1, LastName:1}").ToListAsync();
-            var teachers = await _context.Teachers.Find(FilterDefinition<Teacher>.Empty)
-                .Project<Teacher>("{FirstName:1, LastName:1}").ToListAsync();
-            var subjects = await _context.Subjects.Find(s => s.Date == date).ToListAsync();
-            
-            return new
+
+            return children.Select(c =>
             {
-                children = children.Select(c =>
-                {
-                    var name = $"{c.LastName} {(c.FirstName.Length == 0 ? string.Empty : $"{c.FirstName[0]}.")}"
-                        .TrimEnd(' ');
-                    return new { c.Id, name };
-                }),
-                teachers = teachers.Select(t =>
-                {
-                    var name = $"{t.LastName} {(t.FirstName.Length == 0 ? string.Empty : $"{t.FirstName[0]}.")}"
-                        .TrimEnd(' ');
-                    return new { t.Id, name };
-                }),
-                subjects
-            };
+                var name = $"{c.LastName} {(c.FirstName.Length == 0 ? string.Empty : $"{c.FirstName[0]}.")}"
+                    .TrimEnd(' ');
+                return new { c.Id, name };
+            });
         }
 
         [HttpPost("subject/removeChild")]
