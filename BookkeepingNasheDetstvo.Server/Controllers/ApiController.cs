@@ -193,22 +193,21 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         [HttpPost("subject/removeChild")]
         [ValidateAccessToken]
         [ValidateModel]
-        public async Task<ActionResult> RemoveSubjectChild([FromBody] RemoveSubjectChildModel model, Teacher current)
+        public async Task<ActionResult> RemoveChildFromSubject([FromBody] RemoveSubjectChildModel model, Teacher current)
         {
             if (!current.EditSubjects && !current.IsOwner)
                 return StatusCode(403);
             
-            var updatedChildren = await _context.Subjects.FindOneAndUpdateAsync<Subject>(
-                s => s.Date == model.Date && s.Time == model.Time && s.Owner.Id == model.OwnerId,
+            var updatedChildren = await _context.Subjects.FindOneAndUpdateAsync(s => s.Id == model.Id,
                 Builders<Subject>.Update.PullFilter(s => s.Children, c => c.Id == model.ChildId),
-                new FindOneAndUpdateOptions<Subject, Subject>
+                new FindOneAndUpdateOptions<Subject, List<IdNamePair>>
                 {
-                    Projection = "{Children:1}",
+                    Projection = new FindExpressionProjectionDefinition<Subject, List<IdNamePair>>(s => s.Children),
                     ReturnDocument = ReturnDocument.After
                 });
             
-            if (updatedChildren.Children.Count == 0)
-                await _context.Subjects.DeleteOneAsync(s => s.Id == updatedChildren.Id);
+            if (updatedChildren.Count == 0)
+                await _context.Subjects.DeleteOneAsync(s => s.Id == model.Id);
             
             return Ok();
         }
@@ -216,32 +215,41 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         [HttpPost("subject/addChild")]
         [ValidateAccessToken]
         [ValidateModel]
-        public async Task<ActionResult> AddSubjectChild([FromBody] AddSubjectChildModel model, Teacher current)
+        public async Task<ActionResult<string>> AddChildToSubject([FromBody] AddSubjectChildModel model, Teacher current)
         {
             if (!current.EditSubjects && !current.IsOwner)
                 return StatusCode(403);
             
-            var id = await _context.Subjects.Find(s => s.Date == model.Date && s.Time == model.Time
-                && s.Owner.Id == model.Owner.Id).Project(s => s.Id).SingleOrDefaultAsync();
-            
-            if (id == default)
-                await _context.Subjects.InsertOneAsync(new Subject
-                {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    Children = new List<IdNamePair> { model.Child },
-                    Date = model.Date,
-                    Time = model.Time,
-                    Owner = model.Owner,
-                    IsConsultation = model.IsConsultation,
-                    PlaceIdentifier = model.PlaceIdentifier
-                });
-            else await _context.Subjects.UpdateOneAsync(s => s.Id == id,
-                Builders<Subject>.Update.Push(s => s.Children, model.Child));
-            
+            await _context.Subjects.UpdateOneAsync(
+                s => s.Id == model.Id,
+                Builders<Subject>.Update.Push(s => s.Children, model.Child),
+                new UpdateOptions {IsUpsert = false});
+
             return Ok();
         }
-        
-        // TODO update subject child method
+
+        [HttpPost("subject/create")]
+        [ValidateAccessToken]
+        [ValidateModel]
+        public async Task<ActionResult<string>> CreateSubject([FromBody] CreateSubjectModel model, Teacher current)
+        {
+            if (!current.EditSubjects && !current.IsOwner)
+                return StatusCode(403);
+
+            var id = ObjectId.GenerateNewId().ToString();
+            await _context.Subjects.InsertOneAsync(new Subject
+            {
+                Id = id,
+                Date = model.Date,
+                Time = model.Time,
+                Owner = model.Owner,
+                IsConsultation = model.IsConsultation,
+                PlaceIdentifier = model.PlaceIdentifier,
+                Children = new List<IdNamePair>()
+            });
+            
+            return id;
+        }
 
         [HttpGet("statistic/child/{childId:required}")]
         [ValidateAccessToken]
