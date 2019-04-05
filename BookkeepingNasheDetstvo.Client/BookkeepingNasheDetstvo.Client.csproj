@@ -15,8 +15,4 @@
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="0.9.0-preview3-19154-02" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BookkeepingNasheDetstvo.Shared\BookkeepingNasheDetstvo.Shared.csproj" />
-  </ItemGroup>
-
 </Project>
