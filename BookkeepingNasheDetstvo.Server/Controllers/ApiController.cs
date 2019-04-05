@@ -146,7 +146,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
         [ValidateAccessToken]
         public async Task<ActionResult> DeleteTeacher(string id, Teacher current)
         {
-            var affected = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{IsOwner:1}")
+            var affected = await _context.Teachers.Find(t => t.Id == id).Project<Teacher>("{IsOwner:1, _id:0}")
                 .SingleOrDefaultAsync();
             if (affected == default)
                 return NotFound();
