@@ -9,7 +9,7 @@
                 {
                     <span class="w3-xlarge w3-bar-item">Консультация</span>
                     <label class="switch">
-                        <input type="checkbox" bind="@IsConsultation">
+                        <input type="checkbox" bind="@IsConsultation" onchange="@SetConsultationAsync">
                         <span class="slider round"></span>
                     </label>
                 }
