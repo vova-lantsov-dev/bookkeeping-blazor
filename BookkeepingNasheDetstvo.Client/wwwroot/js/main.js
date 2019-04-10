@@ -1,4 +1,7 @@
 ﻿window.Extensions = {
+    /**
+     * @return {string}
+     */
     ReadStorage: function (key) {
         return localStorage.getItem(key);
     },
