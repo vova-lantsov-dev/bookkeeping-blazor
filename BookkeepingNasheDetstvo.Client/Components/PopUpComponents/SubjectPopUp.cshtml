@@ -1,96 +1,100 @@
 @inherits BaseComponent
 
-@if (SelectedChildren != default)
-{
-    <div id="modal" class="w3-modal">
-        <div class="w3-modal-content w3-card-4 w3-animate-zoom">
-            <header class="w3-teal w3-bar w3-padding-small">
-                @if (EditChildren)
-                {
-                    <span class="w3-xlarge w3-bar-item">Консультация</span>
-                    <label class="switch">
-                        <input type="checkbox" bind="@IsConsultation" onchange="@SetConsultationAsync">
-                        <span class="slider round"></span>
-                    </label>
-                }
-            </header>
-
-            <div class="w3-container">
-                @for (var childOffset = 0;; childOffset++)
-                {
-                    var childrenRow = SelectedChildren.Skip(childOffset * 3).Take(3).ToList();
-                    var count = childrenRow.Count;
-                    if (count == 0)
+<div id="modal" class="w3-modal w3-@(Opened ? "show" : "hide")">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom">
+        <header class="w3-teal w3-bar w3-padding-small">
+            <button class="w3-bar-item w3-button w3-red w3-right w3-hover-teal w3-border w3-border-red w3-large" onclick="@Close">&times;</button>
+            @if (EditChildren)
+            {
+                 if (!AddingChildren)
+                 {
+                     <button class="w3-bar-item w3-button w3-green w3-large w3-border w3-border-green w3-hover-teal" onclick="@(() => AddingChildren = true)">Добавить ребёнка</button>
+                 }
+                 else
+                 {
+                     <button class="w3-bar-item w3-button w3-red w3-large w3-border w3-border-red w3-hover-teal" onclick="@(() => AddingChildren = false)">Завершить добавление</button>
+                 }
+            }
+            <span class="w3-large w3-bar-item">Консультация</span>
+            <div class="w3-bar-item w3-center">
+                <label class="switch">
+                    @if (EditChildren)
                     {
-                        break;
+                        <input type="checkbox" value="@IsConsultation" onchange="@((UIChangeEventArgs e) => { IsConsultation = (bool) e.Value; SetConsultationAsync(); })">
                     }
-
-                    <div class="w3-row w3-padding-small">
-                        @foreach (var child in childrenRow)
-                        {
-                            <div class="w3-third w3-mobile w3-padding-small">
-                                <div class="w3-center w3-card-4 w3-round">
-                                    @if (EditChildren)
-                                    {
-                                        <div class="w3-display-container w3-hover-opacity">
-                                            <img class="w3-image" style="max-width:300px" alt="Фото для @child.Name" src="@child.ImageUrl"/>
-                                            <div class="w3-display-middle w3-display-hover">
-                                                <button class="w3-button w3-red w3-hover-text-red w3-border w3-border-red w3-hover-white" onclick="@(() => DeleteChildAsync(child.Id))">Удалить</button>
-                                            </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <img class="w3-image" style="max-width:300px" alt="Фото для @child.Name" src="@child.ImageUrl"/>
-                                    }
-                                    <span class="w3-large">@child.Name</span>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    if (count < 3)
+                    else
                     {
-                        break;
+                        <input type="checkbox" value="@IsConsultation" disabled>
                     }
-                }
+                    <span class="slider round"></span>
+                </label>
             </div>
+        </header>
 
-            <footer class="w3-teal w3-container w3-padding-small">
-                @if (EditChildren && AllChildren.Count > 0)
+        <div class="w3-container">
+            @for (var childOffset = 0;; childOffset++)
+            {
+                var childrenRow = (!AddingChildren ? SelectedChildren : AllChildren.Where(c => !SelectedChildren.Exists(sc => sc.Id == c.Id))).Skip(childOffset * 3).Take(3).ToList();
+                if (childrenRow.Count == 0)
                 {
-                    <div class="w3-dropdown-click">
-                        <button onclick="triggerSubjectDropdown()" class="w3-button w3-blue w3-hover-white w3-text-white w3-hover-text-blue w3-border w3-border-blue">Добавить ребёнка</button>
-                        <div id="subject-dropdown" class="w3-dropdown-content w3-bar-block w3-animate-zoom">
-                            @foreach (var child in AllChildren)
-                            {
-                                <div class="w3-bar-item w3-button w3-center" onclick="@(() => AddChildAsync(child.Id))">
-                                    <strong>@child.Name</strong>
-                                    <img class="w3-image" alt="Фото для @child.Name" src="@child.ImageUrl"/>
-                                </div>
-                            }
-                        </div>
-                    </div>
+                    break;
                 }
-            </footer>
+
+                <div class="w3-row w3-padding-small">
+                    @foreach (var child in childrenRow)
+                    {
+                        <div class="w3-third w3-mobile w3-padding-small">
+                            <div class="w3-center w3-card-4 w3-round">
+                                @if (EditChildren)
+                                {
+                                    <div class="w3-display-container w3-hover-opacity">
+                                        <img class="w3-image" style="max-width:300px" alt="Фото для @child.Name" src="@child.ImageUrl"/>
+                                        <div class="w3-display-middle w3-display-hover">
+                                            @if (AddingChildren)
+                                            {
+                                                <button class="w3-button w3-green w3-hover-text-green w3-border w3-border-green w3-hover-white" onclick="@(() => AddChildAsync(child.Id))">Добавить</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="w3-button w3-red w3-hover-text-red w3-border w3-border-red w3-hover-white" onclick="@(() => DeleteChildAsync(child.Id))">Удалить</button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <img class="w3-image" style="max-width:300px" alt="Фото для @child.Name" src="@child.ImageUrl"/>
+                                }
+                                <span class="w3-large">@child.Name</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                if (childrenRow.Count < 3)
+                {
+                    break;
+                }
+            }
         </div>
+
+        <footer class="w3-teal w3-padding-small">
+        </footer>
     </div>
-}
+</div>
 
 @functions
 {
 
+    private bool AddingChildren { get; set; }
+    private bool Opened { get; set; }
     private List<SubjectItemModel> SelectedChildren { get; set; }
-    
-    [Parameter]
+    private string SubjectId { get; set; }
     private bool IsConsultation { get; set; }
     
     [Parameter]
     private bool EditChildren { get; set; }
-    
-    [Parameter]
-    private bool SubjectId { get; set; }
-    
+
     [Parameter]
     private List<SubjectItemModel> AllChildren { get; set; }
 
@@ -118,13 +122,22 @@
         });
     }
 
-    protected override async Task OnInitAsync()
+    private void Close()
     {
-        SelectedChildren = await Get<List<SubjectItemModel>>("/api/subject/selectedChildren");
-        if (SelectedChildren == default || SelectedChildren.Count == 0)
-            return;
-        
-        AllChildren.RemoveAll(child => SelectedChildren.Exists(selectedChild => selectedChild.Id == child.Id));
+        Opened = false;
+        AddingChildren = false;
+    }
+
+    public void Open()
+    {
+        Opened = true;
+    }
+
+    public void SetSubject(List<SubjectItemModel> selectedChildren, string subjectId, bool isConsultation)
+    {
+        SelectedChildren = selectedChildren;
+        SubjectId = subjectId;
+        IsConsultation = isConsultation;
     }
 
 }
