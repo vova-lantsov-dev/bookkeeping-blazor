@@ -1,33 +1,37 @@
-﻿@using BookkeepingNasheDetstvo.Shared.Extensions
+﻿@using BookkeepingNasheDetstvo.Client.Components.PopUpComponents
 @inherits BaseComponent
 
-@if (_model != null)
+@if (_subjects != null)
 {
     <div class="w3-container w3-padding-small">
-        <h3>@Date.date, @Date.name</h3>
+        <h3>@DateInfo.date, @DateInfo.name</h3>
         <div class="w3-responsive">
             <table class="w3-table-all w3-centered">
                 <tr>
-                    <th></th>
-                    @foreach (var teacher in _model.Teachers)
+                    @foreach (var teacher in AllTeachers)
                     {
-                        <th>@teacher.Name</th>
+                        <th>@teacher.LastName<br/>@teacher.FirstName</th>
                     }
                 </tr>
                 @foreach (var time in TimeExtensions.GetTimes())
                 {
                     <tr>
-                        <th style="width:90px">@time</th>
-                        @foreach (var teacher in _model.Teachers)
+                        @foreach (var teacher in AllTeachers)
                         {
-                            var subject = _model.Subjects.Find(s => s.Time == time && s.Owner.Id == teacher.Id)
-                                ?? new S { Children = new List<Shared.IdNamePair>(), Date = Date.date, Time = time, Owner = teacher };
-                            <SubjectsTableItem Currents=@subject.Children
-                                               AllChildren=@_model.Children.ToList()
-                                               Write=@(WriteTeacherSubjects)
-                                               Date=@Date.date
-                                               Time=@subject.Time
-                                               Owner=@subject.Owner />
+                            var subject = _subjects.Find(s => s.OwnerId == teacher.Id && s.Time == time);
+                            <td>
+                                <button class="w3-transparent w3-button w3-block" onclick="@(() => OpenSubject(subject))">
+                                    <strong>@time</strong>
+                                    @if (subject.IsConsultation)
+                                    {
+                                        <span class="w3-tag w3-yellow">К</span>
+                                    }
+                                    else if (subject.IsGroup)
+                                    {
+                                        <span class="w3-tag w3-orange">Г</span>
+                                    }
+                                </button>
+                            </td>
                         }
                     </tr>
                 }
@@ -37,20 +41,29 @@
 }
 
 @functions {
-    Shared.Day _model;
+    
+    [Parameter]
+    private (string date, string name) DateInfo { get; set; }
+    
+    [Parameter]
+    private List<IdFullNamePair> AllTeachers { get; set; }
 
     [Parameter]
-    (string date, string name) Date { get; set; }
+    private SubjectPopUp PopUp { get; set; }
+    
+    private List<SubjectModel> _subjects;
 
-    [Parameter]
-    string CurrentId { get; set; }
-
-    [Parameter]
-    bool WriteTeacherSubjects { get; set; }
+    private async void OpenSubject(SubjectModel subject)
+    {
+        var selectedChildren = await Get<List<SubjectItemModel>>($"/api/subject/{subject.Id}");
+        PopUp.SetSubject(selectedChildren, subject.Id, subject.IsConsultation);
+        PopUp.Open();
+    }
 
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
-        _model = await Get<Shared.Day>($"/api/subjectsModel/?date={Date.date}");
+        _subjects = await Get<List<SubjectModel>>($"/api/subjects/?date={DateInfo.date}");
     }
+    
 }

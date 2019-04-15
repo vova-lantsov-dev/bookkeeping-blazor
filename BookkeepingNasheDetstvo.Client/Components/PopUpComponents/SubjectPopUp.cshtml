@@ -4,7 +4,7 @@
     <div class="w3-modal-content w3-card-4 w3-animate-zoom">
         <header class="w3-teal w3-bar w3-padding-small">
             <button class="w3-bar-item w3-button w3-red w3-right w3-hover-teal w3-border w3-border-red w3-large" onclick="@Close">&times;</button>
-            @if (EditChildren)
+            @if (EditSubjects)
             {
                  if (!AddingChildren)
                  {
@@ -18,7 +18,7 @@
             <span class="w3-large w3-bar-item">Консультация</span>
             <div class="w3-bar-item w3-center">
                 <label class="switch">
-                    @if (EditChildren)
+                    @if (EditSubjects)
                     {
                         <input type="checkbox" value="@IsConsultation" onchange="@((UIChangeEventArgs e) => { IsConsultation = (bool) e.Value; SetConsultationAsync(); })">
                     }
@@ -45,7 +45,7 @@
                     {
                         <div class="w3-third w3-mobile w3-padding-small">
                             <div class="w3-center w3-card-4 w3-round">
-                                @if (EditChildren)
+                                @if (EditSubjects)
                                 {
                                     <div class="w3-display-container w3-hover-opacity">
                                         <img class="w3-image" style="max-width:300px" alt="Фото для @child.Name" src="@child.ImageUrl"/>
@@ -93,7 +93,7 @@
     private bool IsConsultation { get; set; }
     
     [Parameter]
-    private bool EditChildren { get; set; }
+    private bool EditSubjects { get; set; }
 
     [Parameter]
     private List<SubjectItemModel> AllChildren { get; set; }
