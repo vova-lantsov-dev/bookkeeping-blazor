@@ -1,43 +1,47 @@
 ﻿@using System.Globalization
-@inherits SubmitComponentBase
+@inherits BaseComponent
 
 <div class="w3-rest w3-mobile">
     <div class="w3-container w3-padding">
-        <InputLabelComponent Label="Фамилия" Value="@Child.LastName" OnChange="@(it => { Child.LastName = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Имя" Value="@Child.FirstName" OnChange="@(it => { Child.FirstName = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Отчество" Value="@Child.SecondName" OnChange="@(it => { Child.SecondName = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Ссылка на фото" Value="@Child.ImageUrl" OnChange="@(it => { Child.ImageUrl = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Отец" Value="@Child.FatherName" OnChange="@(it => { Child.FatherName = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Телефон отца" Value="@Child.FatherPhone" OnChange="@(it => { Child.FatherPhone = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Мать" Value="@Child.MotherName" OnChange="@(it => { Child.MotherName = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Телефон матери" Value="@Child.MotherPhone" OnChange="@(it => { Child.MotherPhone = (string)it.Value; Edited(); })" />
-        <InputLabelComponent Label="Оплата за обычное занятие" Value="@Child.PerHour.ToString(CultureInfo.CurrentCulture)" OnChange="@(it => { Child.PerHour = decimal.TryParse((string)it.Value, out var perHour) ? perHour : 0m; Edited(); })" />
-        <InputLabelComponent Label="Оплата за групповое занятие"/>
+        <InputLabelComponent Label="Фамилия" Value="@Child.LastName"
+                             OnChange="@(it => { Child.LastName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Имя" Value="@Child.FirstName"
+                             OnChange="@(it => { Child.FirstName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Отчество" Value="@Child.SecondName"
+                             OnChange="@(it => { Child.SecondName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Ссылка на фото" Value="@Child.ImageUrl"
+                             OnChange="@(it => { Child.ImageUrl = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Отец" Value="@Child.FatherName"
+                             OnChange="@(it => { Child.FatherName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Телефон отца" Value="@Child.FatherPhone"
+                             OnChange="@(it => { Child.FatherPhone = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Мать" Value="@Child.MotherName"
+                             OnChange="@(it => { Child.MotherName = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Телефон матери" Value="@Child.MotherPhone"
+                             OnChange="@(it => { Child.MotherPhone = (string)it.Value; Edited(); })" />
+        <InputLabelComponent Label="Оплата за обычное занятие"
+                             Value="@Child.PerHour.ToString(CultureInfo.CurrentCulture)"
+                             OnChange="@(it =>
+                                         {
+                                             if (decimal.TryParse((string) it.Value, out var perHour))
+                                             {
+                                                 Child.PerHour = perHour;
+                                                 Edited();
+                                             }
+                                         })" />
+        <InputLabelComponent Label="Оплата за групповое занятие"
+                             Value="@Child.PerHourGroup.ToString(CultureInfo.CurrentCulture)"
+                             OnChange="@(it =>
+                                         {
+                                             if (decimal.TryParse((string) it.Value, out var perHour))
+                                             {
+                                                 Child.PerHourGroup = perHour;
+                                                 Edited();
+                                             }
+                                         })"/>
     </div>
     <div class="w3-row">
-        @if (!Success)
-        {
-            if (!Busy)
-            {
-                <HalfButtonComponent Color="green" Text="Сохранить" Click=@Save />
-                <HalfButtonComponent Color="red" Text="Удалить" Click=@Delete />
-            }
-            else if (Saving)
-            {
-                <HalfButtonComponent Color="green" NoHover=true Text="Сохраняем..." />
-                <HalfButtonComponent Color="red" Disabled=true NoHover=true Text="Удалить" />
-            }
-            else
-            {
-                <HalfButtonComponent Color="green" Disabled=true NoHover=true Text="Сохранить" />
-                <HalfButtonComponent Color="red" NoHover=true Text="Удаляем..." />
-            }
-        }
-        else
-        {
-            <HalfButtonComponent Color="green" NoHover=true Disabled=true Text="Сохранить" />
-            <HalfButtonComponent Color="red" Click=@Delete Text="Удалить" />
-        }
+        <HalfButtonSavingGroup IsSuccess="@Success" IsBusy="@Busy" IsSaving="@Saving" DeleteAsync="@DeleteAsync" SaveAsync="@SaveAsync" />
     </div>
     @if (ReadGlobalStatistic)
     {
@@ -48,15 +52,15 @@
 @functions {
     bool Busy { get; set; }
     bool Success { get; set; } = true;
-    bool Saving { get; set; } = true;
+    bool Saving { get; set; }
 
     [Parameter]
-    C Child { get; set; }
+    ChildModel Child { get; set; }
 
     [Parameter]
     bool ReadGlobalStatistic { get; set; }
 
-    async void Save()
+    async void SaveAsync()
     {
         if (Busy || Success)
             return;
@@ -65,14 +69,14 @@
         Saving = true;
         StateHasChanged();
 
-        Child.Id = await SubmitAsync(Child);
+        Child.Id = await Post<string>("/api/child", Child);
 
         Busy = false;
         Success = true;
         StateHasChanged();
     }
 
-    async void Delete()
+    async void DeleteAsync()
     {
         if (Busy)
             return;
@@ -81,7 +85,8 @@
         Saving = false;
         StateHasChanged();
 
-        await DeleteAsync(Child.Id, "/children");
+        if (await Post("/api/child/delete", Child.Id))
+            UriHelper.NavigateTo("/children");
     }
 
     void Edited()

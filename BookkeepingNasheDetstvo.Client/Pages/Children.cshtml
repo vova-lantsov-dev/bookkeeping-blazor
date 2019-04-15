@@ -32,7 +32,8 @@ else
     {
         await CheckAccessToken();
         
-        var children = await Get<List<C>>("/api/children");
+        // TODO refactoring
+        var children = await Get<List<ChildModel>>("/api/children");
         
         IsOk = children != default;
         if (!IsOk)

@@ -10,7 +10,7 @@
 </LoadingAction>
 
 @functions {
-    private C _child;
+    private ChildModel _child;
 
     [Parameter] private string Id { get; set; }
 
@@ -19,8 +19,8 @@
         await CheckAccessToken();
         await LoadCurrent();
         _child = !string.IsNullOrEmpty(Id)
-            ? await Get<C>($"/api/child/{Id}")
-            : new C
+            ? await Get<ChildModel>($"/api/child/{Id}")
+            : new ChildModel
             {
                 FirstName = "",
                 ImageUrl = "",

@@ -1,6 +1,6 @@
 @if (EditChildren)
 {
-    <ChildInputs Base="child" Child="@Child" ReadGlobalStatistic="@ReadGlobalStatistics" />
+    <ChildInputs Child="@Child" ReadGlobalStatistic="@ReadGlobalStatistics" />
 }
 else
 {
@@ -13,5 +13,5 @@ else
     
     [Parameter] private bool ReadGlobalStatistics { get; set; }
     
-    [Parameter] private C Child { get; set; }
+    [Parameter] private ChildModel Child { get; set; }
 }
