@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using BookkeepingNasheDetstvo.Client.Extensions;
-using BookkeepingNasheDetstvo.Shared;
+using BookkeepingNasheDetstvo.Client.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Services;
 using Microsoft.JSInterop;
@@ -11,7 +11,7 @@ namespace BookkeepingNasheDetstvo.Client.Components
 {
     public class BaseComponent : ComponentBase
     {
-        protected Teacher Current { get; set; }
+        protected TeacherModel Current { get; set; }
         protected string AccessToken { get; set; }
         protected bool IsOk { get; set; } = true;
 
@@ -36,7 +36,7 @@ namespace BookkeepingNasheDetstvo.Client.Components
         }
         protected async Task LoadCurrent()
         {
-            Current = await Get<Teacher>("/api/current");
+            Current = await Get<TeacherModel>("/api/current");
             if (Current == default)
                 UriHelper.NavigateTo("/authorize");
         }

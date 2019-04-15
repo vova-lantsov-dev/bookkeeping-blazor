@@ -27,7 +27,7 @@
 
     private async Task Load()
     {
-        var teachers = await Get<List<T>>("/api/teachers");
+        var teachers = await Get<List<TeacherModel>>("/api/teachers");
 
         if (teachers == default)
         {
@@ -35,6 +35,7 @@
             return;
         }
         
+        // TODO refactoring
         _models.Clear();
         foreach (var teacher in teachers)
             _models.Add(new AvatarItemModel

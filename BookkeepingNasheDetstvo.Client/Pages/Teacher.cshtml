@@ -6,12 +6,12 @@
 <RedirectLoadingAction IsOk="@IsOk" CheckIfNullObject="@_teacher" Message="Произошла ошибка при поиске преподавателя."
                RedirectUrl="/teachers">
     <Avatar AvatarUrl="@_teacher.ImageUrl" />
-    <TeacherComponent ReadGlobalStatistic="@Current.ReadGlobalStatistics" Teacher="@_teacher" EditTeachers="@Current.EditTeachers" />
+    <TeacherComponent ReadGlobalStatistic="@Current.ReadGlobalStatistic" Teacher="@_teacher" EditTeachers="@Current.EditTeachers" />
 </RedirectLoadingAction>
 
 @functions
 {
-    private T _teacher;
+    private TeacherModel _teacher;
     
     [Parameter] private string Id { get; set; }
 
@@ -20,8 +20,8 @@
         await CheckAccessToken();
         await LoadCurrent();
         _teacher = !string.IsNullOrEmpty(Id)
-            ? await Get<T>($"/api/teacher/{Id}")
-            : new T
+            ? await Get<TeacherModel>($"/api/teacher/{Id}")
+            : new TeacherModel
             {
                 PerHour = 0m,
                 Additional = "",
@@ -30,7 +30,7 @@
                 ImageUrl = "",
                 LastName = "",
                 PhoneNumber = "+380",
-                ReadGlobalStatistics = false,
+                ReadGlobalStatistic = false,
                 SecondName = "",
                 EditChildren = false,
                 EditTeachers = false,

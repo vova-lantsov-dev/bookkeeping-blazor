@@ -1,5 +1,5 @@
 ﻿@using System.Globalization
-@inherits SubmitComponentBase
+@inherits BaseComponent
 
 <div class="w3-rest w3-mobile">
     <div class="w3-container w3-padding">
@@ -23,7 +23,7 @@
         <input class="w3-check" type="checkbox" bind="@Teacher.EditSubjects" onclick="@Edited" />
         <label>Изменение расписания всех преподавателей</label>
         <br />
-        <input class="w3-check" type="checkbox" bind="@Teacher.ReadGlobalStatistics" onclick="@Edited" />
+        <input class="w3-check" type="checkbox" bind="@Teacher.ReadGlobalStatistic" onclick="@Edited" />
         <label>Просмотр статистики</label>
     </div>
     <div class="w3-row">
@@ -68,7 +68,7 @@
     bool Saving { get; set; } = true;
 
     [Parameter]
-    T Teacher { get; set; }
+    TeacherModel Teacher { get; set; }
 
     [Parameter]
     bool ReadStatistic { get; set; }
@@ -82,7 +82,9 @@
         Saving = true;
         StateHasChanged();
 
-        Teacher.Id = await SubmitAsync(Teacher);
+        var teacherId = await Post<string>("/api/teacher", Teacher);
+        if (!string.IsNullOrEmpty(teacherId))
+            Teacher.Id = teacherId;
 
         Busy = false;
         Success = true;
@@ -98,7 +100,8 @@
         Saving = false;
         StateHasChanged();
 
-        await DeleteAsync(Teacher.Id, "/teachers");
+        if (await Post("/api/teacher/delete", Teacher.Id))
+            UriHelper.NavigateTo("/teachers");
     }
 
     void Edited()

@@ -1,6 +1,6 @@
 @if (EditTeachers)
 {
-    <TeacherInputs Base="teacher" Teacher="@Teacher" ReadStatistic="@ReadGlobalStatistic" />
+    <TeacherInputs Teacher="@Teacher" ReadStatistic="@ReadGlobalStatistic" />
 }
 else
 {
@@ -13,5 +13,5 @@ else
     
     [Parameter] private bool ReadGlobalStatistic { get; set; }
     
-    [Parameter] private T Teacher { get; set; }
+    [Parameter] private TeacherModel Teacher { get; set; }
 }
