@@ -19,7 +19,7 @@ namespace BookkeepingNasheDetstvo.Server
         {
             services.AddMvcCore().AddNewtonsoftJson(options =>
             {
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                //options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             }).AddDataAnnotations().AddRazorViewEngine().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
             services.AddResponseCompression(options =>
             {

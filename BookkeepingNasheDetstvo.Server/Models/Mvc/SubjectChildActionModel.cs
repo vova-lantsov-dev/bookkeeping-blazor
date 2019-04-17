@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BookkeepingNasheDetstvo.Server.Models.Mvc
 {
-    public sealed class RemoveSubjectChildModel
+    public sealed class SubjectChildActionModel
     {
-        [Required] public string Id { get; set; }
+        [Required] public string SubjectId { get; set; }
         
         [Required] public string ChildId { get; set; }
     }

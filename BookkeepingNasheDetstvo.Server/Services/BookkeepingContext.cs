@@ -58,7 +58,7 @@ namespace BookkeepingNasheDetstvo.Server.Services
             
             var credential = new Credential
             {
-                Id = teacher.Id,
+                TeacherId = teacher.Id,
                 Salt = PasswordGenerator.Generate(8)
             };
             credential.PasswordHash = PasswordExtensions.HashPassword("w5g5jCXn", credential.Salt);

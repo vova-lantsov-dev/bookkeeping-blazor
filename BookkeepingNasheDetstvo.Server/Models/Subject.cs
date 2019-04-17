@@ -1,11 +1,10 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System.Collections.Generic;
-using BookkeepingNasheDetstvo.Server.Models.Mvc;
 using MongoDB.Bson;
 
 namespace BookkeepingNasheDetstvo.Server.Models
 {
-    public class Subject
+    public sealed class Subject
     {
         [BsonRepresentation(BsonType.ObjectId)] public string Id { get; set; }
         
@@ -13,9 +12,9 @@ namespace BookkeepingNasheDetstvo.Server.Models
         
         public string Time { get; set; }
         
-        public List<IdNamePair> Children { get; set; }
+        public List<string> ChildrenIds { get; set; }
         
-        public IdNamePair Owner { get; set; }
+        public string OwnerId { get; set; }
         
         public string PlaceIdentifier { get; set; }
         
