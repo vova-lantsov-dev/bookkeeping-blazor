@@ -6,7 +6,7 @@
 <LoadingAction IsOk="@IsOk" CheckIfNullObject="@_child" NotOkText="Произошла ошибка при поиске ребёнка."
                NotOkSubmitButtonText="Вернуться назад" NotOkRedirectUrl="/children">
     <Avatar AvatarUrl="@_child.ImageUrl" />
-    <ChildComponent EditChildren="@Current.EditChildren" ReadGlobalStatistics="@Current.ReadGlobalStatistics" Child="@_child" />
+    <ChildComponent EditChildren="@Current.EditChildren" ReadGlobalStatistics="@Current.ReadGlobalStatistic" Child="@_child" />
 </LoadingAction>
 
 @functions {

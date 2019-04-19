@@ -1,4 +1,4 @@
-@layout __Layout
+﻿@layout __Layout
 @page "/statistic/{Type}/{Id}"
 @using BookkeepingNasheDetstvo.Client.Models.Statistic
 @inherits BaseComponent
@@ -48,7 +48,7 @@ protected override async Task OnInitAsync()
 {
     await CheckAccessToken();
     await LoadCurrent();
-    if (!Current.ReadGlobalStatistics || Type != "child" && Type != "teacher")
+    if (!Current.ReadGlobalStatistic || Type != "child" && Type != "teacher")
         UriHelper.NavigateTo("/");
 
     await UpdateStatistic();
