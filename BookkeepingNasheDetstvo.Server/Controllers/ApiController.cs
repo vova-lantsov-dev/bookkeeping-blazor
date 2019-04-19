@@ -222,6 +222,22 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
             return children.Select(c => new { c.Id, Name = $"{c.LastName} {c.FirstName}".Trim(), c.ImageUrl });
         }
 
+        [HttpGet("subject/selectedChildren")]
+        [ValidateAccessToken]
+        public async Task<object> ListSelectedChildren([FromQuery] string subjectId)
+        {
+            var selectedChildrenIds = await _context.Subjects.Find(s => s.Id == subjectId).Project(s => s.ChildrenIds)
+                .SingleOrDefaultAsync();
+            if (selectedChildrenIds == default)
+            {
+                return NotFound();
+            }
+
+            var children = await _context.Children.Find(Builders<Child>.Filter.In(c => c.Id, selectedChildrenIds))
+                .Project<Child>("{FirstName:1, LastName:1, ImageUrl:1}").ToListAsync();
+            return children.Select(c => new { c.Id, Name = $"{c.LastName} {c.FirstName}".Trim(), c.ImageUrl });
+        }
+
         [HttpPost("subject/removeChild")]
         [ValidateAccessToken]
         [ValidateModel]

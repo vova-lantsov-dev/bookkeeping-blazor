@@ -1,4 +1,5 @@
 ﻿@using BookkeepingNasheDetstvo.Client.Components.PopUpComponents
+@using BookkeepingNasheDetstvo.Client.Models.Subject
 @inherits BaseComponent
 
 @if (_subjects != null)
@@ -22,11 +23,11 @@
                             <td>
                                 <button class="w3-transparent w3-button w3-block" onclick="@(() => OpenSubject(subject))">
                                     <strong>@time</strong>
-                                    @if (subject.IsConsultation)
+                                    @if (subject?.IsConsultation ?? false)
                                     {
                                         <span class="w3-tag w3-yellow">К</span>
                                     }
-                                    else if (subject.IsGroup)
+                                    else if (subject?.IsGroup ?? false)
                                     {
                                         <span class="w3-tag w3-orange">Г</span>
                                     }
@@ -55,8 +56,8 @@
 
     private async void OpenSubject(SubjectModel subject)
     {
-        var selectedChildren = await Get<List<SubjectItemModel>>($"/api/subject/{subject.Id}");
-        PopUp.SetSubject(selectedChildren, subject.Id, subject.IsConsultation);
+        var model = await Get<SelectedChildrenModel>($"/api/subject/selectedChildren/?subjectId={subject?.Id}");
+        PopUp.SetSubject(model.SelectedChildren, model.SubjectId, subject?.IsConsultation ?? false);
         PopUp.Open();
     }
 
