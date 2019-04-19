@@ -1,5 +1,6 @@
-﻿@layout __Layout
+@layout __Layout
 @page "/statistic/{Type}/{Id}"
+@using BookkeepingNasheDetstvo.Client.Models.Statistic
 @inherits BaseComponent
 
 @if (!string.IsNullOrEmpty(_statistic?.Name))
@@ -26,32 +27,7 @@ else
     <ButtonComponent Color="blue" Text="Обновляем данные..." NoHover=true Disabled=true Click=@(async () => await UpdateStatistic()) />
 }
 <div class="w3-container">
-    @if (_statistic == null)
-    {
-        if (IsOk)
-        {
-            <Loading />
-        }
-        else
-        {
-            <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
-        }
-    }
-    else
-    {
-        <label>Всего часов проведено за выбранный срок: @_statistic.TotalHours</label>
-        <br>
-        <label>Оплата за час занятия: @_statistic.PerHour грн</label>
-        <br>
-        <label>Всего к оплате за указанный промежуток времени: @(_statistic.TotalHours * _statistic.PerHour) грн</label>
-        if (_statistic.SourceItems.Any())
-        {
-            <div class="w3-container w3-padding-small">
-                <h2>Подробная статистика:</h2>
-            </div>
-            <AvatarList UriHelper=@UriHelper Models=@(_statistic.SourceItems.Select(si => new AvatarItemModel { AvatarUrl = si.ImageUrl, Title = $"{si.Name} — {si.TotalHours} час(а/ов)", ViewUrl = $"/{(Type == "child" ? "teacher" : "child")}/{si.Id}" })) />
-        }
-    }
+    
 </div>
 
 @functions {
@@ -60,7 +36,7 @@ bool _busy = true;
 DateTime From { get; set; }
 DateTime To { get; set; }
 
-St _statistic;
+StatisticModel _statistic;
 
 [Parameter]
 string Id { get; set; }
@@ -90,7 +66,7 @@ async Task UpdateStatistic()
         To = now.Date;
     }
 
-    _statistic = await Get<St>($"/api/statistic/{Type}/{Id}/?from={From:d-M-yyyy}&to={To:d-M-yyyy}");
+    _statistic = await Get<StatisticModel>($"/api/statistic/{Type}/{Id}/?from={From:d-M-yyyy}&to={To:d-M-yyyy}");
     IsOk = _statistic != default;
 
     _busy = false;
