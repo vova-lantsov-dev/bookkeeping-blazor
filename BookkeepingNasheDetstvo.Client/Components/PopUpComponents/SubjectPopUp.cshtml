@@ -20,11 +20,11 @@
                 <label class="switch">
                     @if (EditSubjects)
                     {
-                        <input type="checkbox" value="@IsConsultation" onchange="@((UIChangeEventArgs e) => { IsConsultation = (bool) e.Value; SetConsultationAsync(); })">
+                        <input type="checkbox" value="@IsConsultation" onchange="@((UIChangeEventArgs e) => { IsConsultation = (bool) e.Value; SetConsultationAsync(); })" />
                     }
                     else
                     {
-                        <input type="checkbox" value="@IsConsultation" disabled>
+                        <input type="checkbox" value="@IsConsultation" disabled />
                     }
                     <span class="slider round"></span>
                 </label>
