@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace BookkeepingNasheDetstvo.Server
 {
@@ -11,7 +12,7 @@ namespace BookkeepingNasheDetstvo.Server
         {
             await new WebHostBuilder()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseEnvironment(EnvironmentName.Development)
+                .UseEnvironment(Environments.Development)
                 .UseKestrel()
                 .UseShutdownTimeout(TimeSpan.FromSeconds(20d))
                 .UseSockets()
