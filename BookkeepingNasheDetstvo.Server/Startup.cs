@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -16,17 +15,15 @@ namespace BookkeepingNasheDetstvo.Server
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvcCore().AddNewtonsoftJson(options =>
-            {
-                //options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            }).AddDataAnnotations().AddRazorViewEngine().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
+            services.AddMvcCore().AddNewtonsoftJson().AddDataAnnotations().AddRazorViewEngine()
+                .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
+            
             services.AddResponseCompression(options =>
             {
-                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
-                {
-                    MediaTypeNames.Application.Octet
-                });
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
             });
+            
             services.AddSingleton<BookkeepingContext>();
         }
         
@@ -45,6 +42,7 @@ namespace BookkeepingNasheDetstvo.Server
                     return Task.CompletedTask;
                 });
             });
+            
             app.UseResponseCompression();
 
             if (env.IsDevelopment())
@@ -53,7 +51,12 @@ namespace BookkeepingNasheDetstvo.Server
                 app.UseBlazorDebugging();
             }
             
-            app.UseMvc();
+            app.UseRouting();
+            app.UseEndpoints(routes =>
+            {
+                routes.MapDefaultControllerRoute();
+            });
+            
             app.UseBlazor<Client.Startup>();
         }
     }
