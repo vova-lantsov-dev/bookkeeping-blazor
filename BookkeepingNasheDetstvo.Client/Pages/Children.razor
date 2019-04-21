@@ -26,27 +26,31 @@ else
 
 @functions {
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
-    List<AvatarItemModel> _models = new List<AvatarItemModel>();
+    private readonly List<AvatarItemModel> _models = new List<AvatarItemModel>();
 
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
-        
+
         // TODO refactoring
         var children = await Get<List<ChildModel>>("/api/children");
-        
+
         IsOk = children != default;
         if (!IsOk)
+        {
             return;
-        
+        }
+
         _models.Clear();
         // ReSharper disable once PossibleNullReferenceException
         foreach (var child in children)
+        {
             _models.Add(new AvatarItemModel
             {
                 AvatarUrl = child.ImageUrl,
                 Title = $"{child.LastName} {child.FirstName}".Trim(),
                 ViewUrl = $"/child/{child.Id}"
             });
+        }
     }
 }

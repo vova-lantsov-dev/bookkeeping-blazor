@@ -63,20 +63,22 @@
 </div>
 
 @functions {
-    bool Busy { get; set; }
-    bool Success { get; set; } = true;
-    bool Saving { get; set; } = true;
+    private bool Busy { get; set; }
+    private bool Success { get; set; } = true;
+    private bool Saving { get; set; } = true;
 
     [Parameter]
-    TeacherModel Teacher { get; set; }
+    private TeacherModel Teacher { get; set; }
 
     [Parameter]
-    bool ReadStatistic { get; set; }
+    private bool ReadStatistic { get; set; }
 
     async void Save()
     {
         if (Busy || Success)
+        {
             return;
+        }
 
         Busy = true;
         Saving = true;
@@ -84,7 +86,9 @@
 
         var teacherId = await Post<string>("/api/teacher", Teacher);
         if (!string.IsNullOrEmpty(teacherId))
+        {
             Teacher.Id = teacherId;
+        }
 
         Busy = false;
         Success = true;
@@ -94,14 +98,18 @@
     async void Delete()
     {
         if (Busy)
+        {
             return;
+        }
 
         Busy = true;
         Saving = false;
         StateHasChanged();
 
         if (await Post("/api/teacher/delete", Teacher.Id))
+        {
             UriHelper.NavigateTo("/teachers");
+        }
     }
 
     void Edited()

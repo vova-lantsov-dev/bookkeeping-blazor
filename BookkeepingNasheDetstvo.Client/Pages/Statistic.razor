@@ -31,45 +31,47 @@ else
 </div>
 
 @functions {
-bool _busy = true;
+        bool _busy = true;
 
-DateTime From { get; set; }
-DateTime To { get; set; }
+        DateTime From { get; set; }
+        DateTime To { get; set; }
 
-StatisticModel _statistic;
-
-[Parameter]
-string Id { get; set; }
+        StatisticModel _statistic;
 
 [Parameter]
-string Type { get; set; }
+    string Id { get; set; }
 
-protected override async Task OnInitAsync()
-{
-    await CheckAccessToken();
-    await LoadCurrent();
-    if (!Current.ReadGlobalStatistic || Type != "child" && Type != "teacher")
-        UriHelper.NavigateTo("/");
+    [Parameter]
+    string Type { get; set; }
 
-    await UpdateStatistic();
-}
-
-async Task UpdateStatistic()
-{
-    _busy = true;
-    StateHasChanged();
-
-    if (From == default)
+    protected override async Task OnInitAsync()
     {
-        var now = DateTime.Now;
-        From = new DateTime(now.Year, now.Month, 1);
-        To = now.Date;
+        await CheckAccessToken();
+        await LoadCurrent();
+        if (!Current.ReadGlobalStatistic || Type != "child" && Type != "teacher")
+        {
+            UriHelper.NavigateTo("/");
+        }
+
+        await UpdateStatistic();
     }
 
-    _statistic = await Get<StatisticModel>($"/api/statistic/{Type}/{Id}/?from={From:d-M-yyyy}&to={To:d-M-yyyy}");
-    IsOk = _statistic != default;
+    async Task UpdateStatistic()
+    {
+        _busy = true;
+        StateHasChanged();
 
-    _busy = false;
-    StateHasChanged();
-}
+        if (From == default)
+        {
+            var now = DateTime.Now;
+            From = new DateTime(now.Year, now.Month, 1);
+            To = now.Date;
+        }
+
+        _statistic = await Get<StatisticModel>($"/api/statistic/{Type}/{Id}/?from={From:d-M-yyyy}&to={To:d-M-yyyy}");
+        IsOk = _statistic != default;
+
+        _busy = false;
+        StateHasChanged();
+    }
 }

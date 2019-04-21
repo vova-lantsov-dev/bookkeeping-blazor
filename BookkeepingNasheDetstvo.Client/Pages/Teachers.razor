@@ -1,5 +1,5 @@
-﻿@layout __Layout
-@page "/teachers"
+﻿@page "/teachers"
+@layout __Layout
 @inherits BaseComponent
 
 <ButtonComponent Color="blue" Text="Добавить преподавателя" Click=@(() => UriHelper.NavigateTo("/teacher")) />
@@ -18,7 +18,7 @@
 @functions
 {
     private readonly List<AvatarItemModel> _models = new List<AvatarItemModel>();
-    
+
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
@@ -34,15 +34,17 @@
             IsOk = false;
             return;
         }
-        
+
         // TODO refactoring
         _models.Clear();
         foreach (var teacher in teachers)
+        {
             _models.Add(new AvatarItemModel
             {
                 AvatarUrl = teacher.ImageUrl,
                 Title = $"{teacher.LastName} {teacher.FirstName}".Trim(),
                 ViewUrl = $"/teacher/{teacher.Id}"
             });
+        }
     }
 }

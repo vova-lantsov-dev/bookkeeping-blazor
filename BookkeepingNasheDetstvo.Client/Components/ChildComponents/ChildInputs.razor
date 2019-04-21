@@ -50,20 +50,22 @@
 </div>
 
 @functions {
-    bool Busy { get; set; }
-    bool Success { get; set; } = true;
-    bool Saving { get; set; }
+    private bool Busy { get; set; }
+    private bool Success { get; set; } = true;
+    private bool Saving { get; set; }
 
     [Parameter]
-    ChildModel Child { get; set; }
+    private ChildModel Child { get; set; }
 
     [Parameter]
-    bool ReadGlobalStatistic { get; set; }
+    private bool ReadGlobalStatistic { get; set; }
 
     async void SaveAsync()
     {
         if (Busy || Success)
+        {
             return;
+        }
 
         Busy = true;
         Saving = true;
@@ -79,14 +81,18 @@
     async void DeleteAsync()
     {
         if (Busy)
+        {
             return;
+        }
 
         Busy = true;
         Saving = false;
         StateHasChanged();
 
         if (await Post("/api/child/delete", Child.Id))
+        {
             UriHelper.NavigateTo("/children");
+        }
     }
 
     void Edited()
