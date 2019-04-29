@@ -1,33 +1,3 @@
 ﻿@page "/authorize"
-@inherits BaseComponent
 
-<form class="w3-content w3-card w3-padding-small w3-margin-top" onsubmit="return false;">
-    <h1 class="w3-blue w3-center">Вход</h1>
-
-    <div class="w3-padding-small">
-        <label>Номер телефона</label>
-        <input class="w3-input" type="text" bind="@Login" />
-
-        <label>Пароль</label>
-        <input class="w3-input" type="password" bind="@Password" />
-    </div>
-
-    <ButtonComponent Color="green" Text="Войти" Click="@LogIn" />
-</form>
-
-@functions {
-    string Login { get; set; } = string.Empty;
-    string Password { get; set; } = string.Empty;
-
-    async void LogIn()
-    {
-        var token = await Post<string>("/api/authorize", new { Login, Password }, false);
-        if (token != null)
-        {
-            await BrowserExtensions.WriteLocalStorageAsync(Defaults.AuthTokenStorageName, token);
-            UriHelper.NavigateTo("/");
-        }
-        Login = "";
-        Password = "";
-    }
-}
+<BookkeepingNasheDetstvo.Client.Components.ForAuthorization.AuthorizationForm />
