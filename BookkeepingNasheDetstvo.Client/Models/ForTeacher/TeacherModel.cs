@@ -1,12 +1,14 @@
-namespace BookkeepingNasheDetstvo.Client.Models
+namespace BookkeepingNasheDetstvo.Client.Models.ForTeacher
 {
     public sealed class TeacherModel
     {
         public string Id { get; set; }
         
-        public decimal PerHour { get; set; }
+        public decimal PerHourPrivate { get; set; }
         
         public decimal PerHourGroup { get; set; }
+
+        public decimal PerHourConsultation { get; set; }
         
         public string FirstName { get; set; }
         

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 
-namespace BookkeepingNasheDetstvo.Client.Models.Subject
+namespace BookkeepingNasheDetstvo.Client.Models.ForSubject
 {
     public sealed class SelectedChildrenModel
     {
-        public List<SubjectItemModel> SelectedChildren { get; set; }
+        public List<SubjectChildModel> SelectedChildren { get; set; }
         
         public string SubjectId { get; set; }
     }

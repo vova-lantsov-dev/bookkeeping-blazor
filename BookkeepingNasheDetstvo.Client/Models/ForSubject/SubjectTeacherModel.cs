@@ -1,6 +1,6 @@
-namespace BookkeepingNasheDetstvo.Client.Models
+namespace BookkeepingNasheDetstvo.Client.Models.ForSubject
 {
-    public sealed class IdFullNamePair
+    public sealed class SubjectTeacherModel
     {
         public string Id { get; set; }
 

@@ -1,4 +1,4 @@
-namespace BookkeepingNasheDetstvo.Client.Models
+namespace BookkeepingNasheDetstvo.Client.Models.ForChild
 {
     public sealed class ChildModel
     {
@@ -20,8 +20,10 @@ namespace BookkeepingNasheDetstvo.Client.Models
         
         public string MotherPhone { get; set; }
         
-        public decimal PerHour { get; set; }
+        public decimal PerHourPrivate { get; set; }
         
         public decimal PerHourGroup { get; set; }
+
+        public decimal PerHourConsultation { get; set; }
     }
 }

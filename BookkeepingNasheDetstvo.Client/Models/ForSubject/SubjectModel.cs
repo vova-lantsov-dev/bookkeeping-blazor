@@ -1,4 +1,4 @@
-namespace BookkeepingNasheDetstvo.Client.Models
+namespace BookkeepingNasheDetstvo.Client.Models.ForSubject
 {
     public sealed class SubjectModel
     {

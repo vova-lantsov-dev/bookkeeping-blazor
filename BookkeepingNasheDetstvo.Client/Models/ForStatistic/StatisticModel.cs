@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 
-namespace BookkeepingNasheDetstvo.Client.Models.Statistic
+namespace BookkeepingNasheDetstvo.Client.Models.ForStatistic
 {
     public sealed class StatisticModel
     {
-        public decimal PerHour { get; set; }
+        public decimal PerHourPrivate { get; set; }
         
         public decimal PerHourGroup { get; set; }
+
+        public decimal PerHourConsultation { get; set; }
         
         public string Name { get; set; }
         

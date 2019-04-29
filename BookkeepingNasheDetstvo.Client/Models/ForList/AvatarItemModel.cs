@@ -1,6 +1,6 @@
-﻿namespace BookkeepingNasheDetstvo.Client.Models
+﻿namespace BookkeepingNasheDetstvo.Client.Models.ForList
 {
-    public class AvatarItemModel
+    public sealed class AvatarItemModel
     {
         public string Title { get; set; }
 

@@ -1,4 +1,4 @@
-namespace BookkeepingNasheDetstvo.Client.Models.Statistic
+namespace BookkeepingNasheDetstvo.Client.Models.ForStatistic
 {
     public sealed class TotalHoursModel
     {
