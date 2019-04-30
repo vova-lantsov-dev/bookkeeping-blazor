@@ -1,0 +1,39 @@
+﻿@if (CheckIfNullObject == null)
+{
+    if (IsOk)
+    {
+        <p>Ожидайте, данные загружаются...</p>
+    }
+    else
+    {
+        <div class="w3-container">
+            <h5>@Message</h5>
+            <button onclick="@SubmitButtonAction">@SubmitButtonText</button>
+        </div>
+    }
+}
+else
+{
+    @ChildContent
+}
+
+@functions
+{
+    [Parameter]
+    private bool IsOk { get; set; }
+
+    [Parameter]
+    private object CheckIfNullObject { get; set; }
+
+    [Parameter]
+    private string Message { get; set; }
+
+    [Parameter]
+    private string SubmitButtonText { get; set; }
+
+    [Parameter]
+    private Action SubmitButtonAction { get; set; }
+
+    [Parameter]
+    private RenderFragment ChildContent { get; set; }
+}

@@ -1,0 +1,43 @@
+<div class="w3-row">
+    @if (!IsSuccess)
+    {
+        if (!IsBusy)
+        {
+            <HalfButton Color="green" Text="Сохранить" Click="@SaveAsync" />
+            <HalfButton Color="red" Text="Удалить" Click="@DeleteAsync" />
+        }
+        else if (IsSaving)
+        {
+            <HalfButton Color="green" NoHover="@true" Text="Сохраняем..." />
+            <HalfButton Color="red" Disabled="@true" NoHover="@true" Text="Удалить" />
+        }
+        else
+        {
+            <HalfButton Color="green" Disabled="@true" NoHover="@true" Text="Сохранить" />
+            <HalfButton Color="red" NoHover="@true" Text="Удаляем..." />
+        }
+    }
+    else
+    {
+        <HalfButton Color="green" NoHover="@true" Disabled="@true" Text="Сохранить" />
+        <HalfButton Color="red" Click="@DeleteAsync" Text="Удалить" />
+    }
+</div>
+
+@functions
+{
+    [Parameter]
+    private bool IsSuccess { get; set; }
+
+    [Parameter]
+    private bool IsBusy { get; set; }
+
+    [Parameter]
+    private bool IsSaving { get; set; }
+
+    [Parameter]
+    private Action DeleteAsync { get; set; }
+
+    [Parameter]
+    private Action SaveAsync { get; set; }
+}

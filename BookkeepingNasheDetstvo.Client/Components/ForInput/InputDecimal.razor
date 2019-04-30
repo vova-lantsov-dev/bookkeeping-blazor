@@ -1,0 +1,13 @@
+﻿<label>@Label</label>
+<input class="w3-input" type="number" bind="@Value" oninput="(this.dispatchEvent(new CustomEvent('change', {bubbles: true})))" />
+
+@functions {
+    [Parameter]
+    private string Label { get; set; }
+
+    [Parameter]
+    private decimal Value { get; set; }
+
+    [Parameter]
+    private decimal ValueChanged { get; set; }
+}
