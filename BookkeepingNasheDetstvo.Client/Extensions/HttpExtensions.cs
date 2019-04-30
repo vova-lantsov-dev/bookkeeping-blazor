@@ -65,7 +65,11 @@ namespace BookkeepingNasheDetstvo.Client.Extensions
             uriHelper.NavigateTo("/authorize");
         }
 
-        private static async Task<T> ReadJsonContentAsync<T>(this HttpResponseMessage response) =>
-            response.StatusCode != HttpStatusCode.OK ? default : Json.Deserialize<T>(await response.Content.ReadAsStringAsync());
+        private static async Task<T> ReadJsonContentAsync<T>(this HttpResponseMessage response)
+        {
+            return response.StatusCode != HttpStatusCode.OK || typeof(T) == typeof(object)
+                ? default
+                : Json.Deserialize<T>(await response.Content.ReadAsStringAsync());
+        }
     }
 }
