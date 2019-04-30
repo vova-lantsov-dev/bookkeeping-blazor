@@ -1,0 +1,90 @@
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForInput
+@inherits SessionController
+
+<div class="w3-rest w3-mobile">
+    <div class="w3-container w3-padding">
+        <InputText Label="Фамилия" bind-Value="@Teacher.LastName" />
+        <InputText Label="Имя" bind-Value="@Teacher.FirstName" />
+        <InputText Label="Отчество" bind-Value="@Teacher.SecondName" />
+        <InputText Label="Номер телефона" bind-Value="@Teacher.PhoneNumber" />
+        <InputText Label="Электронный адрес" bind-Value="@Teacher.Email" />
+        <InputText Label="Ссылка на фото" bind-Value="@Teacher.ImageUrl" />
+        <InputText Label="Дополнительная информация" bind-Value="@Teacher.Additional" />
+        <InputDecimal Label="Оплата за час личного занятия" bind-Value="@Teacher.PerHourPrivate" />
+        <InputDecimal Label="Оплата за час группового занятия" bind-Value="@Teacher.PerHourGroup" />
+        <InputDecimal Label="Оплата за час консультации" bind-Value="@Teacher.PerHourConsultation" />
+    </div>
+    <br />
+    <div class="w3-container w3-padding">
+        <InputCheckbox Label="Может менять личные данные детей" bind-Value="@Teacher.EditChildren" />
+        <br />
+        <InputCheckbox Label="Может менять личные данные преподавателей" bind-Value="@Teacher.EditTeachers" />
+        <br />
+        <InputCheckbox Label="Может менять расписание занятий" bind-Value="@Teacher.EditSubjects" />
+        <br />
+        <InputCheckbox Label="Может просматривать статистику всех детей и преподавателей" bind-Value="@Teacher.ReadGlobalStatistic" />
+    </div>
+
+    <HalfButtonSavingGroup DeleteAsync="@Delete" SaveAsync="@Save" IsBusy="@Busy" IsSaving="@Saving" IsSuccess="@Success" />
+
+    @if (ReadGlobalStatistic)
+    {
+        <Button Color="blue" Click=@(() => NavigateTo($"/statistic/teacher/{Teacher.Id}")) Text="Статистика" />
+    }
+</div>
+
+@functions
+{
+    private bool Busy { get; set; }
+    private bool Success { get; set; } = true;
+    private bool Saving { get; set; }
+
+    [Parameter]
+    private TeacherModel Teacher { get; set; }
+
+    [Parameter]
+    private bool ReadGlobalStatistic { get; set; }
+
+    private async void Save()
+    {
+        if (Busy || Success)
+        {
+            return;
+        }
+
+        Busy = true;
+        Saving = true;
+        StateHasChanged();
+
+        var teacherId = await PostAsync<string>("/api/teacher", Teacher);
+        if (!string.IsNullOrEmpty(teacherId))
+        {
+            Teacher.Id = teacherId;
+        }
+
+        Busy = false;
+        Success = true;
+        StateHasChanged();
+    }
+
+    private async void Delete()
+    {
+        if (Busy)
+        {
+            return;
+        }
+
+        Busy = true;
+        Saving = false;
+        StateHasChanged();
+
+        await PostAsync<object>("/api/teacher/delete", Teacher.Id);
+        NavigateTo("/teachers");
+    }
+
+    private void Edited()
+    {
+        Success = false;
+        StateHasChanged();
+    }
+}

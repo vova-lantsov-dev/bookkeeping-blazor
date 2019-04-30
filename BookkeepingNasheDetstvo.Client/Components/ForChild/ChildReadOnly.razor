@@ -1,0 +1,28 @@
+﻿@inject IUriHelper UriHelper
+
+<div class="w3-container w3-card-4">
+    <ListOfLabels Items="@(new Dictionary<string, string>
+                           {
+                               ["Фамилия"] = Child.LastName,
+                               ["Имя"] = Child.FirstName,
+                               ["Отчество"] = Child.SecondName,
+                               ["ФИО матери"] = Child.MotherName,
+                               ["Номер телефона матери"] = Child.MotherPhone,
+                               ["ФИО отца"] = Child.FatherName,
+                               ["Номер телефона отца"] = Child.FatherPhone
+                           })" />
+
+    @if (ReadGlobalStatistic)
+    {
+        <Button Click=@(() => UriHelper.NavigateTo($"/statistic/child/{Child.Id}")) Color="blue" Text="Статистика" />
+    }
+</div>
+
+@functions
+{
+    [Parameter]
+    private ChildModel Child { get; set; }
+
+    [Parameter]
+    private bool ReadGlobalStatistic { get; set; }
+}

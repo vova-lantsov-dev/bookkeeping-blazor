@@ -1,0 +1,28 @@
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForLabels
+@inject IUriHelper UriHelper
+
+<div class="w3-container w3-card-4">
+    <ListOfLabels Items="@(new Dictionary<string, string>
+                            {
+                                ["Фамилия"] = Teacher.LastName,
+                                ["Имя"] = Teacher.FirstName,
+                                ["Отчество"] = Teacher.SecondName,
+                                ["Номер телефона"] = Teacher.PhoneNumber,
+                                ["Электронный адрес"] = Teacher.Email,
+                                ["Дополнительная информация"] = Teacher.Additional
+                            })" />
+
+    @if (ReadGlobalStatistic)
+    {
+        <Button Color="blue" Text="Статистика" Click=@(() => UriHelper.NavigateTo($"/statistic/teacher/{Teacher.Id}")) />
+    }
+</div>
+
+@functions
+{
+    [Parameter]
+    private TeacherModel Teacher { get; set; }
+
+    [Parameter]
+    private bool ReadGlobalStatistic { get; set; }
+}

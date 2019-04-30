@@ -1,8 +1,4 @@
-﻿@using BookkeepingNasheDetstvo.Client.Components.PopUpComponents
-@using BookkeepingNasheDetstvo.Client.Models.Subject
-@inherits BaseComponent
-
-@if (_subjects != null)
+﻿@if (_subjects != null)
 {
     <div class="w3-container w3-padding-small">
         <h3>@DateInfo.date, @DateInfo.name</h3>
@@ -41,30 +37,30 @@
     </div>
 }
 
-@functions {
-    
+@functions
+{
     [Parameter]
     private (string date, string name) DateInfo { get; set; }
-    
-    [Parameter]
-    private List<IdFullNamePair> AllTeachers { get; set; }
 
     [Parameter]
-    private SubjectPopUp PopUp { get; set; }
-    
+    private List<SubjectTeacherModel> AllTeachers { get; set; }
+
+    [Parameter]
+    private SubjectModal PopUp { get; set; }
+
     private List<SubjectModel> _subjects;
 
     private async void OpenSubject(SubjectModel subject)
     {
-        var model = await Get<SelectedChildrenModel>($"/api/subject/selectedChildren/?subjectId={subject?.Id}");
-        PopUp.SetSubject(model.SelectedChildren, model.SubjectId, subject?.IsConsultation ?? false);
-        PopUp.Open();
+        var model = await GetAsync<SelectedChildrenModel>("/api/subject/selectedChildren/",
+            new Dictionary<string, string> { ["subjectId"] = subject?.Id });
+        PopUp.Open(model, subject?.IsConsultation ?? false);
     }
 
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
-        _subjects = await Get<List<SubjectModel>>($"/api/subjects/?date={DateInfo.date}");
+        _subjects = await GetAsync<List<SubjectModel>>("/api/subjects/",
+            new Dictionary<string, string> { ["date"] = DateInfo.date });
     }
-    
 }
