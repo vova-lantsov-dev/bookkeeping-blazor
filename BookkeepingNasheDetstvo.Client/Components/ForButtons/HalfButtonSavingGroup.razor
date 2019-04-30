@@ -36,8 +36,8 @@
     private bool IsSaving { get; set; }
 
     [Parameter]
-    private Action DeleteAsync { get; set; }
+    private Func<Task> DeleteAsync { get; set; }
 
     [Parameter]
-    private Action SaveAsync { get; set; }
+    private Func<Task> SaveAsync { get; set; }
 }

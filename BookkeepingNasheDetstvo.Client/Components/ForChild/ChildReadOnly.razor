@@ -14,7 +14,7 @@
 
     @if (ReadGlobalStatistic)
     {
-        <Button Click=@(() => UriHelper.NavigateTo($"/statistic/child/{Child.Id}")) Color="blue" Text="Статистика" />
+        <Button Click=@(async () => UriHelper.NavigateTo($"/statistic/child/{Child.Id}")) Color="blue" Text="Статистика" />
     }
 </div>
 

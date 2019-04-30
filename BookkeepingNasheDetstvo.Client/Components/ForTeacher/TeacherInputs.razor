@@ -25,11 +25,11 @@
         <InputCheckbox Label="Может просматривать статистику всех детей и преподавателей" bind-Value="@Teacher.ReadGlobalStatistic" />
     </div>
 
-    <HalfButtonSavingGroup DeleteAsync="@Delete" SaveAsync="@Save" IsBusy="@Busy" IsSaving="@Saving" IsSuccess="@Success" />
+    <HalfButtonSavingGroup DeleteAsync="@DeleteAsync" SaveAsync="@SaveAsync" IsBusy="@Busy" IsSaving="@Saving" IsSuccess="@Success" />
 
     @if (ReadGlobalStatistic)
     {
-        <Button Color="blue" Click=@(() => NavigateTo($"/statistic/teacher/{Teacher.Id}")) Text="Статистика" />
+        <Button Color="blue" Click=@(async () => NavigateTo($"/statistic/teacher/{Teacher.Id}")) Text="Статистика" />
     }
 </div>
 
@@ -45,7 +45,7 @@
     [Parameter]
     private bool ReadGlobalStatistic { get; set; }
 
-    private async void Save()
+    private async Task SaveAsync()
     {
         if (Busy || Success)
         {
@@ -67,7 +67,7 @@
         StateHasChanged();
     }
 
-    private async void Delete()
+    private async Task DeleteAsync()
     {
         if (Busy)
         {

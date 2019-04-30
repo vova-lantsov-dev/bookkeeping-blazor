@@ -1,11 +1,11 @@
-﻿@layout __Layout
-@page "/"
-@inherits BaseComponent
+﻿@using System.Globalization
+@using BookkeepingNasheDetstvo.Client.Components.ForInput
+@using BookkeepingNasheDetstvo.Client.Components.ForSubject
+@using BookkeepingNasheDetstvo.Client.Models.ForSubject
 
-@using System.Globalization
-@using BookkeepingNasheDetstvo.Client.Components.InputComponents;
-@using BookkeepingNasheDetstvo.Client.Components.SubjectComponents;
-@using BookkeepingNasheDetstvo.Client.Components.PopUpComponents;
+@layout __Layout
+@page "/"
+@inherits SessionController
 
 <InputDateComponent Date="@Date" DateChanged="@(dt => Date = dt)" />
 
@@ -15,27 +15,28 @@
         var name = DateTimeFormat.GetDayName(date.DayOfWeek);
         var value = date.ToString("dd/MM/yyyy", CultureInfo);
         var dateInfo = (value, name);
-        <SubjectsTable DateInfo="@dateInfo" AllTeachers="@AllTeachers" PopUp="@PopUp" />
+        <SubjectTable DateInfo="@dateInfo" AllTeachers="@AllTeachers" PopUp="@Modal" />
     }
 </ul>
 
-<SubjectPopUp ref="PopUp" EditSubjects="@(Current.EditSubjects || Current.IsOwner)" AllChildren="@AllChildren" />
+<SubjectModal ref="@Modal" EditSubjects="@(Current.EditSubjects || Current.IsOwner)" AllChildren="@AllChildren" />
 
-@functions {
+@functions
+{
     private readonly static CultureInfo CultureInfo = new CultureInfo("ru-RU");
     private readonly static DateTimeFormatInfo DateTimeFormat = CultureInfo.DateTimeFormat;
 
     private DateTime Date { get; set; } = DateTime.Today;
-    private List<SubjectItemModel> AllChildren { get; set; }
-    private List<IdFullNamePair> AllTeachers { get; set; }
-    private SubjectPopUp PopUp { get; set; }
+    private List<SubjectChildModel> AllChildren { get; set; }
+    private List<SubjectTeacherModel> AllTeachers { get; set; }
+    private SubjectModal Modal { get; set; }
 
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
         await LoadCurrent();
 
-        AllChildren = await Get<List<SubjectItemModel>>("/api/subject/allChildren");
-        AllTeachers = await Get<List<IdFullNamePair>>("/api/subject/allTeachers");
+        AllChildren = await GetAsync<List<SubjectChildModel>>("/api/subject/allChildren");
+        AllTeachers = await GetAsync<List<SubjectTeacherModel>>("/api/subject/allTeachers");
     }
 }

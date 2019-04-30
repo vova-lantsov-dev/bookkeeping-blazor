@@ -19,7 +19,7 @@
 
     @if (ReadGlobalStatistic)
     {
-        <Button Color="blue" Click=@(() => NavigateTo($"/statistic/child/{Child.Id}")) Text="Статистика" />
+        <Button Color="blue" Click=@(async () => NavigateTo($"/statistic/child/{Child.Id}")) Text="Статистика" />
     }
 </div>
 
@@ -35,7 +35,7 @@
     [Parameter]
     private bool ReadGlobalStatistic { get; set; }
 
-    private async void SaveAsync()
+    private async Task SaveAsync()
     {
         if (Busy || Success)
         {
@@ -53,7 +53,7 @@
         StateHasChanged();
     }
 
-    private async void DeleteAsync()
+    private async Task DeleteAsync()
     {
         if (Busy)
         {

@@ -1,31 +1,22 @@
-﻿@layout __Layout
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForList
+@using BookkeepingNasheDetstvo.Client.Components.ForLoading
+@using BookkeepingNasheDetstvo.Client.Components.ForButtons
+@using BookkeepingNasheDetstvo.Client.Models.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForChild
+
+@layout __Layout
 @page "/children"
-@inherits BaseComponent
+@inherits SessionController
 
-<ButtonComponent Color="blue" Text="Добавить ребёнка" Click=@(() => UriHelper.NavigateTo("/child")) />    
+<Button Color="blue" Text="Добавить ребёнка" Click=@(async () => NavigateTo("/child")) />
 
-@if (_models == null)
-{
-    if (IsOk)
-    {
-        <Loading />
-    }
-    else
-    {
-        <Action ButtonText="Перезагрузить страницу" Text="Произошла ошибка при загрузке данных" ButtonAction=@(async () => { IsOk = true; StateHasChanged(); await OnInitAsync(); }) />
-    }
-}
-else if (_models.Count == 0)
-{
-    <p>Детей пока что нет.</p>
-}
-else
-{
-    <AvatarList Models=@_models UriHelper=@UriHelper />
-}
+<LoadingAction CheckIfNullObject="@_models" IsOk="@IsOk" Message="Произошла ошибка при поиске детей."
+               SubmitButtonText="Повторить" SubmitButtonAction="@UpdateListAsync">
+    <AvatarListAction Models="@_models" Message="Детей пока что нет." />
+</LoadingAction>
 
-@functions {
-    // ReSharper disable once FieldCanBeMadeReadOnly.Local
+@functions
+{
     private readonly List<AvatarItemModel> _models = new List<AvatarItemModel>();
 
     protected override async Task OnInitAsync()
@@ -33,7 +24,7 @@ else
         await CheckAccessToken();
 
         // TODO refactoring
-        var children = await Get<List<ChildModel>>("/api/children");
+        var children = await GetAsync<List<ChildModel>>("/api/children");
 
         IsOk = children != default;
         if (!IsOk)
@@ -52,5 +43,12 @@ else
                 ViewUrl = $"/child/{child.Id}"
             });
         }
+    }
+
+    private async Task UpdateListAsync()
+    {
+        IsOk = true;
+        StateHasChanged();
+        await OnInitAsync();
     }
 }

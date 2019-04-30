@@ -1,0 +1,16 @@
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForButtons
+
+<div class="w3-padding-small w3-block">
+    <label class="w3-large">Выберите дату:</label>
+    <input class="w3-input w3-large" type="text" format-value="d.M.yyyy" bind="@Date" />
+    <Button Text="Обновить данные" Color="blue" Click="@(async () => DateChanged(Date))" />
+</div>
+
+@functions
+{
+    [Parameter]
+    private DateTime Date { get; set; }
+
+    [Parameter]
+    private Action<DateTime> DateChanged { get; set; }
+}

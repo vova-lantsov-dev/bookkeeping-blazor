@@ -18,7 +18,7 @@
                 <label class="switch">
                     @if (EditSubjects)
                     {
-                        <input type="checkbox" value="@IsConsultation" onchange="@((UIChangeEventArgs e) => { IsConsultation = (bool) e.Value; SetConsultationAsync(); })" />
+                        <input type="checkbox" value="@IsConsultation" onchange="@SetConsultationAsync" />
                     }
                     else
                     {
@@ -95,7 +95,7 @@
     [Parameter]
     private List<SubjectChildModel> AllChildren { get; set; }
 
-    private async void DeleteChildAsync(string childId)
+    private async Task DeleteChildAsync(string childId)
     {
         await PostAsync<object>("/api/subject/deleteChild", new
         {
@@ -103,7 +103,7 @@
         });
     }
 
-    private async void AddChildAsync(string childId)
+    private async Task AddChildAsync(string childId)
     {
         await PostAsync<object>("/api/subject/addChild", new
         {
@@ -111,8 +111,9 @@
         });
     }
 
-    private async void SetConsultationAsync()
+    private async Task SetConsultationAsync(UIChangeEventArgs e)
     {
+        IsConsultation = (bool) e.Value;
         await PostAsync<object>("/api/subject/setConsultation", new
         {
             SubjectId, IsConsultation

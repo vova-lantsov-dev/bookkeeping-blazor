@@ -1,11 +1,11 @@
 ﻿<div class="w3-padding-small">
     @if (Disabled)
     {
-        <button class="w3-button w3-@Color w3-text-white w3-hover-@(NoHover ? Color : "white") w3-hover-text-@(NoHover ? "white" : Color) w3-border-@Color w3-block w3-border" onclick="@Click" disabled>@Text</button>
+        <button class="w3-button w3-@(Color) w3-text-white w3-hover-@(NoHover ? Color : "white") w3-hover-text-@(NoHover ? "white" : Color) w3-border-@(Color) w3-block w3-border" onclick="@Click" disabled>@Text</button>
     }
     else
     {
-        <button class="w3-button w3-@Color w3-text-white w3-hover-@(NoHover ? Color : "white") w3-hover-text-@(NoHover ? "white" : Color) w3-border-@Color w3-block w3-border" onclick="@Click">@Text</button>
+        <button class="w3-button w3-@(Color) w3-text-white w3-hover-@(NoHover ? Color : "white") w3-hover-text-@(NoHover ? "white" : Color) w3-border-@(Color) w3-block w3-border" onclick="@Click">@Text</button>
     }
 </div>
 
@@ -21,7 +21,7 @@
     private string Text { get; set; }
     
     [Parameter]
-    private Action Click { get; set; }
+    private Func<Task> Click { get; set; }
     
     [Parameter]
     private bool NoHover { get; set; }

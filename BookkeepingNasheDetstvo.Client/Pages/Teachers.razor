@@ -1,17 +1,18 @@
-﻿@page "/teachers"
-@layout __Layout
-@inherits BaseComponent
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForButtons
+@using BookkeepingNasheDetstvo.Client.Components.ForLoading
+@using BookkeepingNasheDetstvo.Client.Components.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForTeacher
 
-<ButtonComponent Color="blue" Text="Добавить преподавателя" Click=@(() => UriHelper.NavigateTo("/teacher")) />
+@page "/teachers"
+@layout __Layout
+@inherits SessionController
+
+<Button Color="blue" Text="Добавить преподавателя" Click=@(async () => NavigateTo("/teacher")) />
 
 <LoadingAction IsOk="@IsOk" CheckIfNullObject="@_models" SubmitButtonText="Повторить попытку"
                Message="Произошла ошибка при загрузке списка преподавателей."
-               SubmitButtonAction="@(async () =>
-                                     {
-                                         IsOk = true;
-                                         StateHasChanged();
-                                         await Load();
-                                     })">
+               SubmitButtonAction="@ReloadListAsync">
     <AvatarListAction Models="@_models" Message="Преподавателей пока что нет." />
 </LoadingAction>
 
@@ -27,7 +28,7 @@
 
     private async Task Load()
     {
-        var teachers = await Get<List<TeacherModel>>("/api/teachers");
+        var teachers = await GetAsync<List<TeacherModel>>("/api/teachers");
 
         if (teachers == default)
         {
@@ -35,7 +36,6 @@
             return;
         }
 
-        // TODO refactoring
         _models.Clear();
         foreach (var teacher in teachers)
         {
@@ -46,5 +46,12 @@
                 ViewUrl = $"/teacher/{teacher.Id}"
             });
         }
+    }
+
+    private async Task ReloadListAsync()
+    {
+        IsOk = true;
+        StateHasChanged();
+        await Load();
     }
 }

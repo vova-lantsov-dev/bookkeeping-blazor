@@ -12,7 +12,7 @@
         <span class="w3-xlarge">@Model.Title</span>
     </div>
     <div class="w3-container w3-cell w3-cell-middle w3-mobile" style="width:200px">
-        <Button Click="@(() => UriHelper.NavigateTo(Model.ViewUrl))" Text="Просмотреть" Color="blue" />
+        <Button Click="@(async () => UriHelper.NavigateTo(Model.ViewUrl))" Text="Просмотреть" Color="blue" />
     </div>
 </li>
 

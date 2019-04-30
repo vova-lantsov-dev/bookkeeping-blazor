@@ -24,5 +24,5 @@
     private bool NoHover { get; set; }
 
     [Parameter]
-    private Action Click { get; set; }
+    private Func<Task> Click { get; set; }
 }

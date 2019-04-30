@@ -9,5 +9,5 @@
     private decimal Value { get; set; }
 
     [Parameter]
-    private decimal ValueChanged { get; set; }
+    private EventCallback<decimal> ValueChanged { get; set; }
 }

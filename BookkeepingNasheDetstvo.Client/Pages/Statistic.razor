@@ -1,7 +1,9 @@
-﻿@layout __Layout
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForButtons
+@using BookkeepingNasheDetstvo.Client.Models.ForStatistic
+
+@layout __Layout
 @page "/statistic/{Type}/{Id}"
-@using BookkeepingNasheDetstvo.Client.Models.Statistic
-@inherits BaseComponent
+@inherits SessionController
 
 @if (!string.IsNullOrEmpty(_statistic?.Name))
 {
@@ -9,6 +11,7 @@
         <label class="w3-xlarge w3-text-teal">@_statistic.Name</label>
     </div>
 }
+
 <div class="w3-padding-small">
     <h2>Выберите промежуток:</h2>
     <div class="w3-container w3-card-2 w3-padding-small">
@@ -18,31 +21,30 @@
         <input class="w3-input w3-large" type="text" format-value="d-M-yyyy" bind="@To" />
     </div>
 </div>
+
 @if (!_busy)
 {
-    <ButtonComponent Color="blue" Text="Обновить данные" Click=@(async () => await UpdateStatistic()) />
+    <Button Color="blue" Text="Обновить данные" Click="@UpdateStatistic" />
 }
 else
 {
-    <ButtonComponent Color="blue" Text="Обновляем данные..." NoHover=true Disabled=true Click=@(async () => await UpdateStatistic()) />
+    <Button Color="blue" Text="Обновляем данные..." NoHover="@true" Disabled="@true" Click="@UpdateStatistic" />
 }
-<div class="w3-container">
-    
-</div>
 
-@functions {
-        bool _busy = true;
+@functions
+{
+    private bool _busy = true;
 
-        DateTime From { get; set; }
-        DateTime To { get; set; }
+    private DateTime From { get; set; }
+    private DateTime To { get; set; }
 
-        StatisticModel _statistic;
-
-[Parameter]
-    string Id { get; set; }
+    private StatisticModel _statistic;
 
     [Parameter]
-    string Type { get; set; }
+    private string Id { get; set; }
+
+    [Parameter]
+    private string Type { get; set; }
 
     protected override async Task OnInitAsync()
     {
@@ -50,7 +52,7 @@ else
         await LoadCurrent();
         if (!Current.ReadGlobalStatistic || Type != "child" && Type != "teacher")
         {
-            UriHelper.NavigateTo("/");
+            NavigateTo("/");
         }
 
         await UpdateStatistic();
@@ -68,7 +70,7 @@ else
             To = now.Date;
         }
 
-        _statistic = await Get<StatisticModel>($"/api/statistic/{Type}/{Id}/?from={From:d-M-yyyy}&to={To:d-M-yyyy}");
+        _statistic = await GetAsync<StatisticModel>($"/api/statistic/{Type}/{Id}/?from={From:d-M-yyyy}&to={To:d-M-yyyy}");
         IsOk = _statistic != default;
 
         _busy = false;

@@ -1,7 +1,12 @@
-﻿@layout __Layout
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForLoading
+@using BookkeepingNasheDetstvo.Client.Components.ForTeacher
+@using BookkeepingNasheDetstvo.Client.Components.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForTeacher
+
+@layout __Layout
 @page "/teacher"
 @page "/teacher/{Id}"
-@inherits BaseComponent
+@inherits SessionController
 
 <RedirectLoadingAction IsOk="@IsOk" CheckIfNullObject="@_teacher" Message="Произошла ошибка при поиске преподавателя."
                RedirectUrl="/teachers">
@@ -12,18 +17,18 @@
 @functions
 {
     private TeacherModel _teacher;
-    
-    [Parameter] private string Id { get; set; }
+
+    [Parameter]
+    private string Id { get; set; }
 
     protected override async Task OnInitAsync()
     {
         await CheckAccessToken();
         await LoadCurrent();
         _teacher = !string.IsNullOrEmpty(Id)
-            ? await Get<TeacherModel>($"/api/teacher/{Id}")
+            ? await GetAsync<TeacherModel>($"/api/teacher/{Id}")
             : new TeacherModel
             {
-                PerHour = 0m,
                 Additional = "",
                 Email = "",
                 FirstName = "",
@@ -35,8 +40,10 @@
                 EditChildren = false,
                 EditTeachers = false,
                 EditSubjects = false,
+                IsOwner = false,
                 PerHourGroup = 0m,
-                IsOwner = false
+                PerHourPrivate = 0m,
+                PerHourConsultation = 0m
             };
 
         IsOk = _teacher != default;

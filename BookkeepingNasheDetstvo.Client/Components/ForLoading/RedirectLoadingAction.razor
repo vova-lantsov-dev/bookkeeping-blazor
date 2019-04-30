@@ -1,7 +1,7 @@
 @inject IUriHelper UriHelper
 
 <LoadingAction IsOk="@IsOk" CheckIfNullObject="@CheckIfNullObject" SubmitButtonText="Вернуться назад"
-               Message="@Message" SubmitButtonAction="@(() => UriHelper.NavigateTo(RedirectUrl))">
+               Message="@Message" SubmitButtonAction="@(async () => UriHelper.NavigateTo(RedirectUrl))">
     @ChildContent
 </LoadingAction>
                

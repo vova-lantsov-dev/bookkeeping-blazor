@@ -9,7 +9,7 @@
         <input class="w3-input" type="password" bind="@Password" />
     </div>
 
-    <ButtonComponent Color="green" Text="Войти" Click="@LogIn" />
+    <Button Color="green" Text="Войти" Click="@LogIn" />
 </form>
 
 @functions
@@ -17,7 +17,7 @@
     private string Login { get; set; }
     private string Password { get; set; }
 
-    private async void LogIn()
+    private async Task LogIn()
     {
         var token = await PostAsync<string>("/api/authorize", new { Login, Password });
         if (token != null)

@@ -32,7 +32,7 @@ else
     private string SubmitButtonText { get; set; }
 
     [Parameter]
-    private Action SubmitButtonAction { get; set; }
+    private Func<Task> SubmitButtonAction { get; set; }
 
     [Parameter]
     private RenderFragment ChildContent { get; set; }
