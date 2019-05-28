@@ -1,11 +1,14 @@
 ﻿<div class="w3-half w3-padding-small">
-    @if (Disabled)
-    {
-        <button class="w3-button w3-@Color w3-text-white w3-hover-@(!NoHover ? "white" : Color) w3-hover-text-@(!NoHover ? Color : "white") w3-border-@Color w3-block w3-border" onclick="@Click" disabled>@Text</button>
-    }
-    else
-    {
-        <button class="w3-button w3-@Color w3-text-white w3-hover-@(!NoHover ? "white" : Color) w3-hover-text-@(!NoHover ? Color : "white") w3-border-@Color w3-block w3-border" onclick="@Click">@Text</button>
+    @{
+        var classes = $"w3-button w3-{Color} w3-text-white w3-hover-{(NoHover ? Color : "white")} w3-hover-text-{(NoHover ? "white" : Color)} w3-border-{Color} w3-block w3-border";
+        if (Disabled)
+        {
+            <button class="@classes" onclick="@Click" disabled>@Text</button>
+        }
+        else
+        {
+            <button class="@classes" onclick="@Click">@Text</button>
+        }
     }
 </div>
 
