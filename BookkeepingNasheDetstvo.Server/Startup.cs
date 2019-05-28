@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json.Serialization;
 
 namespace BookkeepingNasheDetstvo.Server
 {
@@ -15,7 +16,7 @@ namespace BookkeepingNasheDetstvo.Server
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvcCore().AddNewtonsoftJson().AddDataAnnotations().AddRazorViewEngine()
+            services.AddControllers(options => options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
                 .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
             
             services.AddResponseCompression(options =>
