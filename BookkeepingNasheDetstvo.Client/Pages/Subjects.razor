@@ -9,6 +9,12 @@
 
 <InputDateComponent Date="@Date" DateChanged="@(dt => Date = dt)" />
 
+@if (AllTeachers == null || AllChildren == null)
+{
+    <p>Loading...</p>
+}
+else
+{
 <ul class="w3-ul w3-card-4">
     @foreach (var date in Enumerable.Range(0, 7).Select(it => Date.AddDays(it)))
     {
@@ -20,6 +26,7 @@
 </ul>
 
 <SubjectModal ref="@Modal" EditSubjects="@(Current.EditSubjects || Current.IsOwner)" AllChildren="@AllChildren" />
+}
 
 @functions
 {
