@@ -21,10 +21,10 @@ namespace BookkeepingNasheDetstvo.Server
             
             services.AddResponseCompression(options =>
             {
-                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "application/octet-stream" });
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Append("application/octet-stream");
             });
-            
+
+            services.AddHostedService<ContextInitService>();
             services.AddSingleton<BookkeepingContext>();
         }
         
