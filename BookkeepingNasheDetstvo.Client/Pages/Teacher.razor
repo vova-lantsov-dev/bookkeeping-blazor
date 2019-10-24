@@ -1,0 +1,51 @@
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForLoading
+@using BookkeepingNasheDetstvo.Client.Components.ForTeacher
+@using BookkeepingNasheDetstvo.Client.Components.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForTeacher
+
+@layout __Layout
+@page "/teacher"
+@page "/teacher/{Id}"
+@inherits SessionController
+
+<RedirectLoadingAction IsOk="@IsOk" CheckIfNullObject="@_teacher" Message="Произошла ошибка при поиске преподавателя."
+               RedirectUrl="/teachers">
+    <Avatar AvatarUrl="@_teacher.ImageUrl" />
+    <TeacherComponent ReadGlobalStatistic="@Current.ReadGlobalStatistic" Teacher="@_teacher" EditTeachers="@Current.EditTeachers" />
+</RedirectLoadingAction>
+
+@functions
+{
+    private TeacherModel _teacher;
+
+    [Parameter]
+    private string Id { get; set; }
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        await LoadCurrent();
+        _teacher = !string.IsNullOrEmpty(Id)
+            ? await GetAsync<TeacherModel>($"/api/teacher/{Id}")
+            : new TeacherModel
+            {
+                Additional = "",
+                Email = "",
+                FirstName = "",
+                ImageUrl = "",
+                LastName = "",
+                PhoneNumber = "+380",
+                ReadGlobalStatistic = false,
+                SecondName = "",
+                EditChildren = false,
+                EditTeachers = false,
+                EditSubjects = false,
+                IsOwner = false,
+                PerHourGroup = 0m,
+                PerHourPrivate = 0m,
+                PerHourConsultation = 0m
+            };
+
+        IsOk = _teacher != default;
+    }
+}

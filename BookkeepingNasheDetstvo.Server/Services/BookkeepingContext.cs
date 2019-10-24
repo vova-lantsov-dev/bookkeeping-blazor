@@ -1,23 +1,18 @@
-﻿using System.Threading;
-using BookkeepingNasheDetstvo.Server.Extensions;
-using BookkeepingNasheDetstvo.Server.Models;
-using Microsoft.Extensions.Hosting;
-using MlkPwgen;
-using MongoDB.Bson;
+﻿using BookkeepingNasheDetstvo.Server.Models;
 using MongoDB.Driver;
 
 namespace BookkeepingNasheDetstvo.Server.Services
 {
-    public class BookkeepingContext
+    internal sealed class BookkeepingContext
     {
-        public readonly IMongoCollection<Teacher> Teachers;
-        public readonly IMongoCollection<Child> Children;
-        public readonly IMongoCollection<Subject> Subjects;
-        public readonly IMongoCollection<Session> Sessions;
-        public readonly IMongoCollection<Credential> Credentials;
-        public readonly IMongoCollection<Place> Places;
+        internal readonly IMongoCollection<Teacher> Teachers;
+        internal readonly IMongoCollection<Child> Children;
+        internal readonly IMongoCollection<Subject> Subjects;
+        internal readonly IMongoCollection<Session> Sessions;
+        internal readonly IMongoCollection<Credential> Credentials;
+        internal readonly IMongoCollection<Place> Places;
 
-        public BookkeepingContext(IHostApplicationLifetime lifetime)
+        public BookkeepingContext()
         {
             var mongo = new MongoClient("mongodb://localhost:27017");
             var db = mongo.GetDatabase(nameof(BookkeepingContext));
@@ -27,42 +22,6 @@ namespace BookkeepingNasheDetstvo.Server.Services
             Sessions = db.GetCollection<Session>(nameof(Sessions));
             Credentials = db.GetCollection<Credential>(nameof(Credentials));
             Places = db.GetCollection<Place>(nameof(Places));
-            
-            AddDefaults(lifetime.ApplicationStopping);
-        }
-
-        private void AddDefaults(CancellationToken cancellationToken)
-        {
-            if (Teachers.Find(FilterDefinition<Teacher>.Empty).Any(cancellationToken))
-                return;
-
-            var teacher = new Teacher
-            {
-                Additional = "",
-                Email = "",
-                FirstName = "Лариса",
-                ImageUrl = "",
-                LastName = "Мантулина",
-                PhoneNumber = "+380983989420",
-                ReadGlobalStatistic = true,
-                SecondName = "Степановна",
-                EditChildren = true,
-                EditTeachers = true,
-                EditSubjects = true,
-                PerHour = 0m,
-                IsOwner = true,
-                PerHourGroup = 0m,
-                Id = ObjectId.GenerateNewId().ToString()
-            };
-            Teachers.InsertOne(teacher, cancellationToken: cancellationToken);
-            
-            var credential = new Credential
-            {
-                TeacherId = teacher.Id,
-                Salt = PasswordGenerator.Generate(8)
-            };
-            credential.PasswordHash = PasswordExtensions.HashPassword("w5g5jCXn", credential.Salt);
-            Credentials.InsertOne(credential, cancellationToken: cancellationToken);
         }
     }
 }

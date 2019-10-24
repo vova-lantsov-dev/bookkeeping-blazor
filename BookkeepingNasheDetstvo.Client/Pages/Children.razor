@@ -1,0 +1,54 @@
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForList
+@using BookkeepingNasheDetstvo.Client.Components.ForLoading
+@using BookkeepingNasheDetstvo.Client.Components.ForButtons
+@using BookkeepingNasheDetstvo.Client.Models.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForChild
+
+@layout __Layout
+@page "/children"
+@inherits SessionController
+
+<Button Color="blue" Text="Добавить ребёнка" Click=@(async () => NavigateTo("/child")) />
+
+<LoadingAction CheckIfNullObject="@_models" IsOk="@IsOk" Message="Произошла ошибка при поиске детей."
+               SubmitButtonText="Повторить" SubmitButtonAction="@UpdateListAsync">
+    <AvatarListAction Models="@_models" Message="Детей пока что нет." />
+</LoadingAction>
+
+@functions
+{
+    private readonly List<AvatarItemModel> _models = new List<AvatarItemModel>();
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+
+        // TODO refactoring
+        var children = await GetAsync<List<ChildModel>>("/api/children");
+
+        IsOk = children != default;
+        if (!IsOk)
+        {
+            return;
+        }
+
+        _models.Clear();
+        // ReSharper disable once PossibleNullReferenceException
+        foreach (var child in children)
+        {
+            _models.Add(new AvatarItemModel
+            {
+                AvatarUrl = child.ImageUrl,
+                Title = $"{child.LastName} {child.FirstName}".Trim(),
+                ViewUrl = $"/child/{child.Id}"
+            });
+        }
+    }
+
+    private async Task UpdateListAsync()
+    {
+        IsOk = true;
+        StateHasChanged();
+        await OnInitAsync();
+    }
+}

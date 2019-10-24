@@ -1,0 +1,49 @@
+﻿@using System.Globalization
+@using BookkeepingNasheDetstvo.Client.Components.ForInput
+@using BookkeepingNasheDetstvo.Client.Components.ForSubject
+@using BookkeepingNasheDetstvo.Client.Models.ForSubject
+
+@layout __Layout
+@page "/"
+@inherits SessionController
+
+<InputDateComponent Date="@Date" DateChanged="@(dt => Date = dt)" />
+
+@if (AllTeachers == null || AllChildren == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+<ul class="w3-ul w3-card-4">
+    @foreach (var date in Enumerable.Range(0, 7).Select(it => Date.AddDays(it)))
+    {
+        var name = DateTimeFormat.GetDayName(date.DayOfWeek);
+        var value = date.ToString("dd/MM/yyyy", CultureInfo);
+        var dateInfo = (value, name);
+        <SubjectTable DateInfo="@dateInfo" AllTeachers="@AllTeachers" PopUp="@Modal" />
+    }
+</ul>
+
+<SubjectModal ref="@Modal" EditSubjects="@(Current.EditSubjects || Current.IsOwner)" AllChildren="@AllChildren" />
+}
+
+@functions
+{
+    private readonly static CultureInfo CultureInfo = new CultureInfo("ru-RU");
+    private readonly static DateTimeFormatInfo DateTimeFormat = CultureInfo.DateTimeFormat;
+
+    private DateTime Date { get; set; } = DateTime.Today;
+    private List<SubjectChildModel> AllChildren { get; set; }
+    private List<SubjectTeacherModel> AllTeachers { get; set; }
+    private SubjectModal Modal { get; set; }
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        await LoadCurrent();
+
+        AllChildren = await GetAsync<List<SubjectChildModel>>("/api/subject/allChildren");
+        AllTeachers = await GetAsync<List<SubjectTeacherModel>>("/api/subject/allTeachers");
+    }
+}

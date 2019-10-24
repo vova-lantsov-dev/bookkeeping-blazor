@@ -1,0 +1,31 @@
+﻿<div class="w3-half w3-padding-small">
+    @{
+        var classes = $"w3-button w3-{Color} w3-text-white w3-hover-{(NoHover ? Color : "white")} w3-hover-text-{(NoHover ? "white" : Color)} w3-border-{Color} w3-block w3-border";
+        if (Disabled)
+        {
+            <button class="@classes" onclick="@Click" disabled>@Text</button>
+        }
+        else
+        {
+            <button class="@classes" onclick="@Click">@Text</button>
+        }
+    }
+</div>
+
+@functions
+{
+    [Parameter]
+    private string Text { get; set; }
+
+    [Parameter]
+    private bool Disabled { get; set; }
+
+    [Parameter]
+    private string Color { get; set; }
+
+    [Parameter]
+    private bool NoHover { get; set; }
+
+    [Parameter]
+    private Func<Task> Click { get; set; }
+}

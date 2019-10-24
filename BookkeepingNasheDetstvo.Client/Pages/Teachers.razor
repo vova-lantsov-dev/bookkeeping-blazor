@@ -1,0 +1,57 @@
+﻿@using BookkeepingNasheDetstvo.Client.Components.ForButtons
+@using BookkeepingNasheDetstvo.Client.Components.ForLoading
+@using BookkeepingNasheDetstvo.Client.Components.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForList
+@using BookkeepingNasheDetstvo.Client.Models.ForTeacher
+
+@page "/teachers"
+@layout __Layout
+@inherits SessionController
+
+<Button Color="blue" Text="Добавить преподавателя" Click=@(async () => NavigateTo("/teacher")) />
+
+<LoadingAction IsOk="@IsOk" CheckIfNullObject="@_models" SubmitButtonText="Повторить попытку"
+               Message="Произошла ошибка при загрузке списка преподавателей."
+               SubmitButtonAction="@ReloadListAsync">
+    <AvatarListAction Models="@_models" Message="Преподавателей пока что нет." />
+</LoadingAction>
+
+@functions
+{
+    private readonly List<AvatarItemModel> _models = new List<AvatarItemModel>();
+
+    protected override async Task OnInitAsync()
+    {
+        await CheckAccessToken();
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var teachers = await GetAsync<List<TeacherModel>>("/api/teachers");
+
+        if (teachers == default)
+        {
+            IsOk = false;
+            return;
+        }
+
+        _models.Clear();
+        foreach (var teacher in teachers)
+        {
+            _models.Add(new AvatarItemModel
+            {
+                AvatarUrl = teacher.ImageUrl,
+                Title = $"{teacher.LastName} {teacher.FirstName}".Trim(),
+                ViewUrl = $"/teacher/{teacher.Id}"
+            });
+        }
+    }
+
+    private async Task ReloadListAsync()
+    {
+        IsOk = true;
+        StateHasChanged();
+        await Load();
+    }
+}

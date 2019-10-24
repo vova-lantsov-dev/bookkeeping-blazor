@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace BookkeepingNasheDetstvo.Client
 {

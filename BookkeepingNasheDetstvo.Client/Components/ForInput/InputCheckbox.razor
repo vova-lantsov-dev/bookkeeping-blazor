@@ -1,0 +1,14 @@
+﻿<input class="w3-check" type="checkbox" bind="@Value" />
+<label>@Label</label>
+
+@functions
+{
+    [Parameter]
+    private string Label { get; set; }
+
+    [Parameter]
+    private bool Value { get; set; }
+
+    [Parameter]
+    private EventCallback<bool> ValueChanged { get; set; }
+}
