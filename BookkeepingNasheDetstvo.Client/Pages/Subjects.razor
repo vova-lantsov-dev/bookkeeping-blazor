@@ -1,32 +1,23 @@
 ﻿@using System.Globalization
-@using BookkeepingNasheDetstvo.Client.Components.ForInput
-@using BookkeepingNasheDetstvo.Client.Components.ForSubject
-@using BookkeepingNasheDetstvo.Client.Models.ForSubject
-
 @layout __Layout
 @page "/"
 @inherits SessionController
 
 <InputDateComponent Date="@Date" DateChanged="@(dt => Date = dt)" />
 
-@if (AllTeachers == null || AllChildren == null)
-{
-    <p>Loading...</p>
-}
-else
-{
-<ul class="w3-ul w3-card-4">
-    @foreach (var date in Enumerable.Range(0, 7).Select(it => Date.AddDays(it)))
-    {
-        var name = DateTimeFormat.GetDayName(date.DayOfWeek);
-        var value = date.ToString("dd/MM/yyyy", CultureInfo);
-        var dateInfo = (value, name);
-        <SubjectTable DateInfo="@dateInfo" AllTeachers="@AllTeachers" PopUp="@Modal" />
-    }
-</ul>
+<LoadingAction CheckIfNullObject="AllTeachers" IsOk="IsOk" Message="Произошла ошибка при загрузке данных" >
+    <ul class="w3-ul w3-card-4">
+        @foreach (var date in Enumerable.Range(0, 7).Select(it => Date.AddDays(it)))
+        {
+            var name = DateTimeFormat.GetDayName(date.DayOfWeek);
+            var value = date.ToString("d", CultureInfo);
+            var dateInfo = (value, name);
+            <SubjectTable DateInfo="@dateInfo" AllTeachers="@AllTeachers" PopUp="@Modal" />
+        }
+    </ul>
 
-<SubjectModal ref="@Modal" EditSubjects="@(Current.EditSubjects || Current.IsOwner)" AllChildren="@AllChildren" />
-}
+    <SubjectModal ref="@Modal" EditSubjects="@(Current.EditSubjects || Current.IsOwner)" AllChildren="@AllChildren" />
+</LoadingAction>
 
 @functions
 {

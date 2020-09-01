@@ -1,35 +1,34 @@
-﻿@using BookkeepingNasheDetstvo.Client.Components.ForInput
-@inherits SessionController
+﻿@inherits SessionController
 
 <div class="w3-rest w3-mobile">
     <div class="w3-container w3-padding">
-        <InputText Label="Фамилия" bind-Value="@Teacher.LastName" />
-        <InputText Label="Имя" bind-Value="@Teacher.FirstName" />
-        <InputText Label="Отчество" bind-Value="@Teacher.SecondName" />
-        <InputText Label="Номер телефона" bind-Value="@Teacher.PhoneNumber" />
-        <InputText Label="Электронный адрес" bind-Value="@Teacher.Email" />
-        <InputText Label="Ссылка на фото" bind-Value="@Teacher.ImageUrl" />
-        <InputText Label="Дополнительная информация" bind-Value="@Teacher.Additional" />
-        <InputDecimal Label="Оплата за час личного занятия" bind-Value="@Teacher.PerHourPrivate" />
-        <InputDecimal Label="Оплата за час группового занятия" bind-Value="@Teacher.PerHourGroup" />
-        <InputDecimal Label="Оплата за час консультации" bind-Value="@Teacher.PerHourConsultation" />
+        <InputText Label="Фамилия" bind-Value-ValueChanged="@Teacher.LastName" />
+        <InputText Label="Имя" bind-Value-ValueChanged="@Teacher.FirstName" />
+        <InputText Label="Отчество" bind-Value-ValueChanged="@Teacher.SecondName" />
+        <InputText Label="Номер телефона" bind-Value-ValueChanged="@Teacher.PhoneNumber" />
+        <InputText Label="Электронный адрес" bind-Value-ValueChanged="@Teacher.Email" />
+        <InputText Label="Ссылка на фото" bind-Value-ValueChanged="@Teacher.ImageUrl" />
+        <InputText Label="Дополнительная информация" bind-Value-ValueChanged="@Teacher.Additional" />
+        <InputDecimal Label="Оплата за час личного занятия" bind-Value-ValueChanged="@Teacher.PerHourPrivate" />
+        <InputDecimal Label="Оплата за час группового занятия" bind-Value-ValueChanged="@Teacher.PerHourGroup" />
+        <InputDecimal Label="Оплата за час консультации" bind-Value-ValueChanged="@Teacher.PerHourConsultation" />
     </div>
     <br />
     <div class="w3-container w3-padding">
-        <InputCheckbox Label="Может менять личные данные детей" bind-Value="@Teacher.EditChildren" />
+        <InputCheckbox Label="Может менять личные данные детей" bind-Value-ValueChanged="@Teacher.EditChildren" />
         <br />
-        <InputCheckbox Label="Может менять личные данные преподавателей" bind-Value="@Teacher.EditTeachers" />
+        <InputCheckbox Label="Может менять личные данные преподавателей" bind-Value-ValueChanged="@Teacher.EditTeachers" />
         <br />
-        <InputCheckbox Label="Может менять расписание занятий" bind-Value="@Teacher.EditSubjects" />
+        <InputCheckbox Label="Может менять расписание занятий" bind-Value-ValueChanged="@Teacher.EditSubjects" />
         <br />
-        <InputCheckbox Label="Может просматривать статистику всех детей и преподавателей" bind-Value="@Teacher.ReadGlobalStatistic" />
+        <InputCheckbox Label="Может просматривать статистику всех детей и преподавателей" bind-Value-ValueChanged="@Teacher.ReadGlobalStatistic" />
     </div>
 
     <HalfButtonSavingGroup DeleteAsync="@DeleteAsync" SaveAsync="@SaveAsync" IsBusy="@Busy" IsSaving="@Saving" IsSuccess="@Success" />
 
     @if (ReadGlobalStatistic)
     {
-        <Button Color="blue" Click=@(async () => NavigateTo($"/statistic/teacher/{Teacher.Id}")) Text="Статистика" />
+        <MyButton Color="blue" Click=@(async () => NavigateTo($"/statistic/teacher/{Teacher.Id}")) Text="Статистика" />
     }
 </div>
 

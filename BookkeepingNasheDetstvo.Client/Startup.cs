@@ -1,6 +1,6 @@
+using BookkeepingNasheDetstvo.Client.Models.States;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace BookkeepingNasheDetstvo.Client
 {
@@ -8,6 +8,7 @@ namespace BookkeepingNasheDetstvo.Client
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<SubjectState>();
         }
 
         public void Configure(IComponentsApplicationBuilder app)

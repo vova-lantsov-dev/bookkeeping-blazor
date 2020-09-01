@@ -1,4 +1,6 @@
-﻿@if (_subjects != null)
+﻿@inject SubjectState State
+
+@if (_subjects != null)
 {
     <div class="w3-container w3-padding-small">
         <h3>@DateInfo.date, @DateInfo.name</h3>

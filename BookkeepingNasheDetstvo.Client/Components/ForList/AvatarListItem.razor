@@ -1,5 +1,4 @@
-﻿@using BookkeepingNasheDetstvo.Client.Components.ForButtons
-@inject IUriHelper UriHelper
+﻿@inject IUriHelper UriHelper
 
 <li class="w3-cell-row">
     @if (!string.IsNullOrEmpty(Model.AvatarUrl))
@@ -12,7 +11,7 @@
         <span class="w3-xlarge">@Model.Title</span>
     </div>
     <div class="w3-container w3-cell w3-cell-middle w3-mobile" style="width:200px">
-        <Button Click="@(async () => UriHelper.NavigateTo(Model.ViewUrl))" Text="Просмотреть" Color="blue" />
+        <MyButton Click="@(async () => UriHelper.NavigateTo(Model.ViewUrl))" Text="Просмотреть" Color="blue" />
     </div>
 </li>
 

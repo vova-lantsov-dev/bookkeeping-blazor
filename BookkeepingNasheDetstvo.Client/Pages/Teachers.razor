@@ -1,14 +1,8 @@
-﻿@using BookkeepingNasheDetstvo.Client.Components.ForButtons
-@using BookkeepingNasheDetstvo.Client.Components.ForLoading
-@using BookkeepingNasheDetstvo.Client.Components.ForList
-@using BookkeepingNasheDetstvo.Client.Models.ForList
-@using BookkeepingNasheDetstvo.Client.Models.ForTeacher
-
-@page "/teachers"
+﻿@page "/teachers"
 @layout __Layout
 @inherits SessionController
 
-<Button Color="blue" Text="Добавить преподавателя" Click=@(async () => NavigateTo("/teacher")) />
+<MyButton Color="blue" Text="Добавить преподавателя" Click=@(async () => NavigateTo("/teacher")) />
 
 <LoadingAction IsOk="@IsOk" CheckIfNullObject="@_models" SubmitButtonText="Повторить попытку"
                Message="Произошла ошибка при загрузке списка преподавателей."

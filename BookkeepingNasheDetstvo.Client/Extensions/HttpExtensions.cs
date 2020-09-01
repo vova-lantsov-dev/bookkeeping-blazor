@@ -39,6 +39,7 @@ namespace BookkeepingNasheDetstvo.Client.Extensions
             if (uri == null || objectToSend == null)
                 return default;
 
+            System.Console.WriteLine(uri);
             var message = new HttpRequestMessage(HttpMethod.Post, uri);
             var content = new StringContent(Json.Serialize(objectToSend), Encoding.UTF8, "application/json");
             if (accessToken != null) content.Headers.TryAddWithoutValidation("Auth-Token", accessToken);

@@ -1,7 +1,4 @@
-﻿@using BookkeepingNasheDetstvo.Client.Components.ForButtons
-@using BookkeepingNasheDetstvo.Client.Models.ForStatistic
-
-@layout __Layout
+﻿@layout __Layout
 @page "/statistic/{Type}/{Id}"
 @inherits SessionController
 
@@ -24,11 +21,11 @@
 
 @if (!_busy)
 {
-    <Button Color="blue" Text="Обновить данные" Click="@UpdateStatistic" />
+    <MyButton Color="blue" Text="Обновить данные" Click="@UpdateStatistic" />
 }
 else
 {
-    <Button Color="blue" Text="Обновляем данные..." NoHover="@true" Disabled="@true" Click="@UpdateStatistic" />
+    <MyButton Color="blue" Text="Обновляем данные..." NoHover="@true" Disabled="@true" Click="@UpdateStatistic" />
 }
 
 @functions

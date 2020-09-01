@@ -1,14 +1,8 @@
-﻿@using BookkeepingNasheDetstvo.Client.Components.ForList
-@using BookkeepingNasheDetstvo.Client.Components.ForLoading
-@using BookkeepingNasheDetstvo.Client.Components.ForButtons
-@using BookkeepingNasheDetstvo.Client.Models.ForList
-@using BookkeepingNasheDetstvo.Client.Models.ForChild
-
-@layout __Layout
+﻿@layout __Layout
 @page "/children"
 @inherits SessionController
 
-<Button Color="blue" Text="Добавить ребёнка" Click=@(async () => NavigateTo("/child")) />
+<MyButton Color="blue" Text="Добавить ребёнка" Click=@(async () => NavigateTo("/child")) />
 
 <LoadingAction CheckIfNullObject="@_models" IsOk="@IsOk" Message="Произошла ошибка при поиске детей."
                SubmitButtonText="Повторить" SubmitButtonAction="@UpdateListAsync">

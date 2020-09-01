@@ -1,4 +1,9 @@
-<div id="modal" class="w3-modal w3-@(Opened ? "show" : "hide")">
+@inject SubjectState State
+
+@{ 
+    var modalClasses = $"w3-modal w3-{(Opened ? "show" : "hide")}";
+}
+<div id="modal" class="@modalClasses">
     <div class="w3-modal-content w3-card-4 w3-animate-zoom">
         <header class="w3-teal w3-bar w3-padding-small">
             <button class="w3-bar-item w3-button w3-red w3-right w3-hover-teal w3-border w3-border-red w3-large" onclick="@Close">&times;</button>

@@ -9,7 +9,7 @@
         <input class="w3-input" type="password" bind="@Password" />
     </div>
 
-    <Button Color="green" Text="Войти" Click="@LogIn" />
+    <MyButton Color="green" Text="Войти" Click="@LogIn" />
 </form>
 
 @functions
@@ -19,7 +19,7 @@
 
     private async Task LogIn()
     {
-        var token = await PostAsync<string>("/api/authorize", new { Login, Password });
+        var token = await PostAsync<string>("api/authorize", new { Login, Password });
         if (token != null)
         {
             await BrowserExtensions.WriteLocalStorageAsync(Defaults.AuthTokenStorageName, token);

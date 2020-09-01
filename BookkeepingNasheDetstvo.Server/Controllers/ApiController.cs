@@ -18,7 +18,7 @@ namespace BookkeepingNasheDetstvo.Server.Controllers
     [Route("api")]
     [Produces("application/json")]
     [SuppressMessage("ReSharper", "UseDeconstructionOnParameter")]
-    public class ApiController : Controller
+    internal sealed class ApiController : Controller
     {
         private readonly BookkeepingContext _context;
 

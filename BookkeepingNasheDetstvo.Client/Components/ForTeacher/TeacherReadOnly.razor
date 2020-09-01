@@ -1,5 +1,4 @@
-﻿@using BookkeepingNasheDetstvo.Client.Components.ForLabels
-@inject IUriHelper UriHelper
+﻿@inject IUriHelper UriHelper
 
 <div class="w3-container w3-card-4">
     <ListOfLabels Items="@(new Dictionary<string, string>
@@ -14,7 +13,7 @@
 
     @if (ReadGlobalStatistic)
     {
-        <Button Color="blue" Text="Статистика" Click=@(async () => UriHelper.NavigateTo($"/statistic/teacher/{Teacher.Id}")) />
+        <MyButton Color="blue" Text="Статистика" Click=@(async () => UriHelper.NavigateTo($"/statistic/teacher/{Teacher.Id}")) />
     }
 </div>
 

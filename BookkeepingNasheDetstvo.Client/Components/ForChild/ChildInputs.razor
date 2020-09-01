@@ -2,24 +2,24 @@
 
 <div class="w3-rest w3-mobile">
     <div class="w3-container w3-padding">
-        <InputText Label="Фамилия" bind-Value="@Child.LastName" />
-        <InputText Label="Имя" bind-Value="@Child.FirstName" />
-        <InputText Label="Отчество" bind-Value="@Child.SecondName" />
-        <InputText Label="Ссылка на фото" bind-Value="@Child.ImageUrl" />
-        <InputText Label="ФИО отца" bind-Value="@Child.FatherName" />
-        <InputText Label="Номер телефона отца" bind-Value="@Child.FatherPhone" />
-        <InputText Label="ФИО матери" bind-Value="@Child.MotherName" />
-        <InputText Label="Номер телефона матери" bind-Value="@Child.MotherPhone" />
-        <InputDecimal Label="Оплата за час личного занятия" bind-Value="@Child.PerHourPrivate" />
-        <InputDecimal Label="Оплата за час группового занятия" bind-Value="@Child.PerHourGroup" />
-        <InputDecimal Label="Оплата за час консультации" bind-Value="@Child.PerHourConsultation" />
+        <InputText Label="Фамилия" bind-Value-ValueChanged="@Child.LastName" />
+        <InputText Label="Имя" bind-Value-ValueChanged="@Child.FirstName" />
+        <InputText Label="Отчество" bind-Value-ValueChanged="@Child.SecondName" />
+        <InputText Label="Ссылка на фото" bind-Value-ValueChanged="@Child.ImageUrl" />
+        <InputText Label="ФИО отца" bind-Value-ValueChanged="@Child.FatherName" />
+        <InputText Label="Номер телефона отца" bind-Value-ValueChanged="@Child.FatherPhone" />
+        <InputText Label="ФИО матери" bind-Value-ValueChanged="@Child.MotherName" />
+        <InputText Label="Номер телефона матери" bind-Value-ValueChanged="@Child.MotherPhone" />
+        <InputDecimal Label="Оплата за час личного занятия" bind-Value-ValueChanged="@Child.PerHourPrivate" />
+        <InputDecimal Label="Оплата за час группового занятия" bind-Value-ValueChanged="@Child.PerHourGroup" />
+        <InputDecimal Label="Оплата за час консультации" bind-Value-ValueChanged="@Child.PerHourConsultation" />
     </div>
 
     <HalfButtonSavingGroup IsSuccess="@Success" IsBusy="@Busy" IsSaving="@Saving" DeleteAsync="@DeleteAsync" SaveAsync="@SaveAsync" />
 
     @if (ReadGlobalStatistic)
     {
-        <Button Color="blue" Click=@(async () => NavigateTo($"/statistic/child/{Child.Id}")) Text="Статистика" />
+        <MyButton Color="blue" Click=@(async () => NavigateTo($"/statistic/child/{Child.Id}")) Text="Статистика" />
     }
 </div>
 
