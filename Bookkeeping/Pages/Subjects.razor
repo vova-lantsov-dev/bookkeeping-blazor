@@ -1,0 +1,72 @@
+﻿@page "/"
+@inject IDbContextFactory<BookkeepingContext> DbFactory
+@attribute [Authorize]
+
+<InputDateComponent Date="@Today"
+                    OnChange="@((DateOnly dt) => { Today = dt; UpdateDates(); StateHasChanged(); })" />
+
+@if (Dates.Count > 0)
+{
+    if (PopUp != null)
+    {
+        <ul class="w3-ul w3-card-4">
+            @foreach ((DateOnly date, string name) date in Dates)
+            {
+                <SubjectsTable DateInfo="@date" AllTeachers="@AllTeachers" PopUp="@PopUp" />
+            }
+        </ul>
+    }
+    
+    <SubjectPopUp @ref="PopUp"
+                  EditSubjects="@(Current.Permissions.EditSubjects || Current.Permissions.IsOwner)"
+                  AllChildren="@AllChildren" />
+}
+
+@code
+{
+    List<(DateOnly date, string name)> Dates { get; } = new();
+    DateTimeFormatInfo DateTimeFormat { get; } = new CultureInfo("ru-RU").DateTimeFormat;
+    DateOnly Today { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    List<Data.Models.Child> AllChildren { get; set; }
+    List<Data.Models.Teacher> AllTeachers { get; set; }
+    Data.Models.Teacher Current { get; set; }
+    SubjectPopUp? PopUp { get; set; }
+    
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState auth = await AuthenticationStateTask;
+        Claim claim = auth.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier);
+        
+        await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
+        
+        Current = await context.Teachers
+            .AsNoTracking()
+            .Include(t => t.Permissions)
+            .FirstAsync(t => t.Id == int.Parse(claim.Value));
+
+        AllChildren = await context.Children
+            .AsNoTracking()
+            .ToListAsync();
+        AllTeachers = await context.Teachers
+            .AsNoTracking()
+            .ToListAsync();
+        
+        UpdateDates();
+    }
+
+    void UpdateDates()
+    {
+        DateOnly copyDate = Today;
+        Dates.Clear();
+        
+        for (var i = 0; i < 7; i++)
+        {
+            if (copyDate.DayOfWeek != DayOfWeek.Sunday)
+                Dates.Add((copyDate, DateTimeFormat.GetDayName(copyDate.DayOfWeek)));
+            copyDate = copyDate.AddDays(1);
+        }
+    }
+}

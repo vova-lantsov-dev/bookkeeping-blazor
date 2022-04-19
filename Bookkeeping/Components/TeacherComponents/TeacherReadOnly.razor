@@ -1,0 +1,30 @@
+﻿@inject NavigationManager Nav
+
+<div class="w3-container w3-card-4">
+    <div class="w3-padding-small">
+        <label>Фамилия: @Teacher.LastName</label>
+        <br />
+        <label>Имя: @Teacher.FirstName</label>
+        <br />
+        <label>Отчество: @Teacher.Patronymic</label>
+        <br />
+        <label>Номер телефона: @Teacher.PhoneNumber</label>
+        <br />
+        <label>Электронный адрес: @Teacher.Email</label>
+        <br />
+        <label>Дополнительное поле 1: @Teacher.Additional</label>
+    </div>
+    @if (ReadStatistic)
+    {
+        <ButtonComponent Color="blue" Text="Статистика" Click=@(() => Nav.NavigateTo($"/statistic/teacher/{Teacher.Id}")) />
+    }
+</div>
+
+@code
+{
+    [Parameter]
+    public Teacher Teacher { get; set; }
+
+    [Parameter]
+    public bool ReadStatistic { get; set; }
+}

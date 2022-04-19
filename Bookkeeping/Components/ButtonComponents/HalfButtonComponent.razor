@@ -1,0 +1,28 @@
+﻿<div class="w3-half w3-padding-small">
+    @if (Disabled)
+    {
+        <button class="w3-button w3-@Color w3-text-white w3-hover-@(!NoHover ? "white" : Color) w3-hover-text-@(!NoHover ? Color : "white") w3-border-@Color w3-block w3-border" disabled>@Text</button>
+    }
+    else
+    {
+        <button class="w3-button w3-@Color w3-text-white w3-hover-@(!NoHover ? "white" : Color) w3-hover-text-@(!NoHover ? Color : "white") w3-border-@Color w3-block w3-border" onclick=@Click>@Text</button>
+    }
+</div>
+
+@code
+{
+    [Parameter]
+    public string Text { get; set; }
+    
+    [Parameter]
+    public bool Disabled { get; set; }
+    
+    [Parameter]
+    public string Color { get; set; }
+    
+    [Parameter]
+    public bool NoHover { get; set; }
+    
+    [Parameter]
+    public Func<Task> Click { get; set; }
+}

@@ -1,0 +1,48 @@
+﻿@page "/teachers"
+@inject NavigationManager Nav
+@inject IDbContextFactory<BookkeepingContext> DbFactory
+
+<ButtonComponent Color="blue" Text="Добавить преподавателя" Click=@(() => Nav.NavigateTo("/teacher")) />
+
+<LoadingAction IsOk="@IsOk"
+               CheckIfNullObject="@Models"
+               SubmitButtonText="Перезагрузить"
+               Message="Произошла ошибка при попытке найти данные про преподавателей."
+               SubmitButtonAction="@(() => Nav.NavigateTo(Nav.Uri, true))">
+    <AvatarListAction Models="Models" Message="Преподавателей пока что нет." />
+</LoadingAction>
+
+@code
+{
+    List<AvatarItemModel>? Models { get; set; }
+    bool IsOk { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<Data.Models.Teacher> teachers;
+
+        try
+        {
+            await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
+            teachers = await context.Teachers
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        catch
+        {
+            IsOk = false;
+            return;
+        }
+
+        var items = new List<AvatarItemModel>(teachers.Count);
+        foreach (Data.Models.Teacher teacher in teachers)
+        {
+            items.Add(new AvatarItemModel(
+                Title: string.Join(' ', teacher.LastName, teacher.FirstName, teacher.Patronymic),
+                ViewUrl: $"/teacher/{teacher.Id}",
+                AvatarUrl: teacher.ImageUrl));
+        }
+        
+        Models = items;
+    }
+}

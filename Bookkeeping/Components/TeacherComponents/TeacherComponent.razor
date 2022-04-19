@@ -1,0 +1,20 @@
+@if (EditTeachers)
+{
+    <TeacherInputs Teacher="@Teacher" ReadStatistic="@ReadGlobalStatistic" />
+}
+else
+{
+    <TeacherReadOnly Teacher="@Teacher" ReadStatistic="@ReadGlobalStatistic" />
+}
+
+@code
+{
+    [Parameter]
+    public bool EditTeachers { get; set; }
+    
+    [Parameter]
+    public bool ReadGlobalStatistic { get; set; }
+    
+    [Parameter]
+    public Teacher Teacher { get; set; }
+}

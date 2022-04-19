@@ -1,0 +1,14 @@
+﻿<div class="w3-padding-small">
+    <ul class="w3-ul w3-card-4">
+        @foreach (AvatarItemModel model in Models)
+        {
+            <AvatarListItem Model="model" />
+        }
+    </ul>
+</div>
+
+@code
+{
+    [Parameter]
+    public IEnumerable<AvatarItemModel> Models { get; set; }
+}

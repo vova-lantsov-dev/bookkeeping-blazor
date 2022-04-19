@@ -1,0 +1,24 @@
+@inject NavigationManager Nav
+
+<LoadingAction IsOk="@IsOk" CheckIfNullObject="@CheckIfNullObject" SubmitButtonText="Вернуться назад"
+               Message="@Message" SubmitButtonAction="@(() => Nav.NavigateTo(RedirectUrl))">
+    @ChildContent
+</LoadingAction>
+               
+@code
+{
+    [Parameter]
+    public bool IsOk { get; set; }
+    
+    [Parameter]
+    public object? CheckIfNullObject { get; set; }
+    
+    [Parameter]
+    public string Message { get; set; }
+    
+    [Parameter]
+    public string RedirectUrl { get; set; }
+    
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

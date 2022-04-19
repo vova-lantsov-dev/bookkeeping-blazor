@@ -1,0 +1,20 @@
+@if (EditChildren)
+{
+    <ChildInputs Child="@Child" ReadGlobalStatistic="@ReadGlobalStatistics" />
+}
+else
+{
+    <ChildReadOnly Child="@Child" ReadGlobalStatistic="@ReadGlobalStatistics" />
+}
+
+@code
+{
+    [Parameter]
+    public bool EditChildren { get; set; }
+    
+    [Parameter]
+    public bool ReadGlobalStatistics { get; set; }
+    
+    [Parameter]
+    public Child Child { get; set; }
+}

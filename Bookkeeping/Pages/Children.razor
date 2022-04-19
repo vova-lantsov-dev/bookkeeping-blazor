@@ -1,0 +1,49 @@
+﻿@page "/children"
+@inject NavigationManager Nav
+@inject IDbContextFactory<BookkeepingContext> DbFactory
+@attribute [Authorize]
+
+<ButtonComponent Color="blue" Text="Добавить ребёнка" Click=@(() => Nav.NavigateTo("/child")) />
+
+<LoadingAction CheckIfNullObject="Models"
+               IsOk="IsOk"
+               Message="Произошла ошибка при попытке найти данные про детей."
+               SubmitButtonText="Перезагрузить"
+               SubmitButtonAction="@(() => Nav.NavigateTo(Nav.Uri, true))">
+    <AvatarListAction Models="Models" Message="Детей пока что нет." />
+</LoadingAction>
+
+@code
+{
+    List<AvatarItemModel>? Models { get; set; }
+    bool IsOk { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<Data.Models.Child> children;
+
+        try
+        {
+            await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
+            children = await context.Children
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        catch
+        {
+            IsOk = false;
+            return;
+        }
+
+        var items = new List<AvatarItemModel>(children.Count);
+        foreach (Data.Models.Child child in children)
+        {
+            items.Add(new AvatarItemModel(
+                Title: string.Join(' ', child.LastName, child.FirstName, child.Patronymic),
+                ViewUrl: $"/child/{child.Id}",
+                AvatarUrl: child.ImageUrl));
+        }
+        
+        Models = items;
+    }
+}

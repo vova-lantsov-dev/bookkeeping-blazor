@@ -1,0 +1,28 @@
+﻿@inject NavigationManager Nav
+
+<div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left" style="width:200px;display:@(CloseMenu ? "none" : "block")">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="@Close">Close &times;</button>
+    <a class="w3-bar-item w3-button" href="/" onclick="@Close">Расписание</a>
+    <a class="w3-bar-item w3-button" href="/teachers" onclick="@Close">Преподаватели</a>
+    <a class="w3-bar-item w3-button" href="/children" onclick="@Close">Дети</a>
+    <a role="button" onclick="@Logout" class="w3-bar-item w3-button">Выйти</a>
+</div>
+
+@code
+{
+    [Parameter]
+    public bool CloseMenu { get; set; }
+    
+    [Parameter]
+    public EventCallback<bool> CloseMenuChanged { get; set; }
+
+    void Logout()
+    {
+        Nav.NavigateTo("/Identity/Account/Logout");
+    }
+
+    void Close()
+    {
+        CloseMenu = true;
+    }
+}

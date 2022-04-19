@@ -1,0 +1,41 @@
+@if (!IsSuccess)
+{
+    if (!IsBusy)
+    {
+        <HalfButtonComponent Color="green" Text="Сохранить" Click="@SaveAsync" />
+        <HalfButtonComponent Color="red" Text="Удалить" Click="@DeleteAsync" />
+    }
+    else if (IsSaving)
+    {
+        <HalfButtonComponent Color="green" NoHover="@true" Text="Сохраняем..." />
+        <HalfButtonComponent Color="red" Disabled="@true" NoHover="@true" Text="Удалить" />
+    }
+    else
+    {
+        <HalfButtonComponent Color="green" Disabled="@true" NoHover="@true" Text="Сохранить" />
+        <HalfButtonComponent Color="red" NoHover="@true" Text="Удаляем..." />
+    }
+}
+else
+{
+    <HalfButtonComponent Color="green" NoHover="@true" Disabled="@true" Text="Сохранить" />
+    <HalfButtonComponent Color="red" Click="@DeleteAsync" Text="Удалить" />
+}
+
+@code
+{
+    [Parameter]
+    public bool IsSuccess { get; set; }
+    
+    [Parameter]
+    public bool IsBusy { get; set; }
+    
+    [Parameter]
+    public bool IsSaving { get; set; }
+    
+    [Parameter]
+    public Func<Task> DeleteAsync { get; set; }
+    
+    [Parameter]
+    public Func<Task> SaveAsync { get; set; }
+}

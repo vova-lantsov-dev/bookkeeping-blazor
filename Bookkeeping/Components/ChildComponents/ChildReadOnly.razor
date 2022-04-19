@@ -1,0 +1,28 @@
+﻿@inject NavigationManager Nav
+
+<div class="w3-container w3-card-4">
+    <div class="w3-padding-small">
+        <label>Фамилия: @Child.LastName</label>
+        <br />
+        <label>Имя: @Child.FirstName</label>
+        <br />
+        <label>Отчество: @Child.Patronymic</label>
+        <br />
+        <label>ФИО отца: @Child.FatherName</label>
+        <br />
+        <label>ФИО матери: @Child.MotherName</label>
+    </div>
+    @if (ReadGlobalStatistic)
+    {
+        <ButtonComponent Click=@(() => Nav.NavigateTo($"/statistic/child/{Child.Id}")) Color="blue" Text="Статистика" />
+    }
+</div>
+
+@code
+{
+    [Parameter]
+    public Child Child { get; set; }
+
+    [Parameter]
+    public bool ReadGlobalStatistic { get; set; }
+}

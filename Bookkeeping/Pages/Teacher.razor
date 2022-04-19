@@ -1,0 +1,53 @@
+﻿@page "/teacher/{Id:int?}"
+@inject IDbContextFactory<BookkeepingContext> DbFactory
+@attribute [Authorize]
+
+<RedirectLoadingAction IsOk="@IsOk"
+                       CheckIfNullObject="@TeacherObject"
+                       Message="Не удалось найти преподавателя по указанному идентификатору"
+                       RedirectUrl="/teachers">
+    <Avatar AvatarUrl="@(TeacherObject!.ImageUrl)" />
+    <TeacherComponent ReadGlobalStatistic="@Current.Permissions.ReadGlobalStatistic"
+                      Teacher="@TeacherObject"
+                      EditTeachers="@Current.Permissions.EditTeachers" />
+</RedirectLoadingAction>
+
+@code
+{
+    Data.Models.Teacher? TeacherObject { get; set; }
+    Data.Models.Teacher Current { get; set; }
+    bool IsOk { get; set; } = true;
+    
+    [Parameter]
+    public int? Id { get; set; }
+    
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState auth = await AuthenticationStateTask;
+        Claim claim = auth.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier);
+
+        await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
+
+        try
+        {
+            Current = await context.Teachers
+                .AsNoTracking()
+                .Include(t => t.Permissions)
+                .FirstAsync(t => t.Id == int.Parse(claim.Value));
+
+            if (Id != null)
+            {
+                TeacherObject = await context.Teachers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == Id.Value) ?? new Data.Models.Teacher();
+            }
+        }
+        catch
+        {
+            IsOk = false;
+        }
+    }
+}

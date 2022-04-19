@@ -1,0 +1,77 @@
+﻿@inject IDbContextFactory<BookkeepingContext> DbFactory
+
+@if (Subjects != null)
+{
+    <div class="w3-container w3-padding-small">
+        <h3>@DateInfo.date, @DateInfo.name</h3>
+        <div class="w3-responsive">
+            <table class="w3-table-all w3-centered">
+                <tr>
+                    @foreach (Teacher teacher in AllTeachers)
+                    {
+                        <th>@teacher.LastName<br/>@teacher.FirstName</th>
+                    }
+                </tr>
+                @foreach (string time in TimeExtensions.GetTimes())
+                {
+                    <tr>
+                        @foreach (Teacher teacher in AllTeachers)
+                        {
+                            Subject? subject = Subjects.Find(s => s.TeacherId == teacher.Id && s.Time == time);
+                            <td>
+                                <button class="w3-transparent w3-button w3-block" onclick="@(() => OpenSubject(subject))">
+                                    <strong>@time</strong>
+                                    @if (subject != null)
+                                    {
+                                        if (subject.IsConsultation)
+                                        {
+                                            <span class="w3-tag w3-yellow">К</span>
+                                        }
+                                        if (subject.ChildrenReference.Count > 1)
+                                        {
+                                            <span class="w3-tag w3-orange">Г</span>
+                                        }
+                                    }
+                                </button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public (DateOnly date, string name) DateInfo { get; set; }
+    
+    [Parameter]
+    public List<Teacher> AllTeachers { get; set; }
+
+    [Parameter]
+    public SubjectPopUp PopUp { get; set; }
+    
+    List<Subject>? Subjects { get; set; }
+
+    void OpenSubject(Subject? subject)
+    {
+        if (subject == null)
+            return;
+        
+        PopUp.SetSubject(subject);
+        PopUp.Open();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
+        Subjects = await context.Subjects
+            .AsNoTracking()
+            .Include(s => s.ChildrenReference)
+            .ThenInclude(sc => sc.Child)
+            .Where(s => s.Date == DateInfo.date)
+            .ToListAsync();
+    }
+}

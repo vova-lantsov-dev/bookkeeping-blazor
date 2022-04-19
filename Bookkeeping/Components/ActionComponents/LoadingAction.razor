@@ -1,0 +1,41 @@
+﻿@inject NavigationManager Nav
+
+@if (CheckIfNullObject == null)
+{
+    if (IsOk)
+    {
+        <p>Ожидайте, данные загружаются...</p>
+    }
+    else
+    {
+        <div class="w3-container">
+            <h5>@Message</h5>
+            <button onclick="@SubmitButtonAction">@SubmitButtonText</button>
+        </div>
+    }
+}
+else
+{
+    @ChildContent
+}
+
+@code
+{
+    [Parameter]
+    public bool IsOk { get; set; } = true;
+    
+    [Parameter]
+    public object? CheckIfNullObject { get; set; }
+
+    [Parameter]
+    public string Message { get; set; }
+
+    [Parameter]
+    public string SubmitButtonText { get; set; }
+    
+    [Parameter]
+    public Action SubmitButtonAction { get; set; }
+    
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

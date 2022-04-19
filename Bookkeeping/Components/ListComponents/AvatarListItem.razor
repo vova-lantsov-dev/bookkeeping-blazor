@@ -1,0 +1,22 @@
+﻿@inject NavigationManager Nav
+
+<li class="w3-cell-row">
+    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+    {
+        <div class="w3-container w3-cell w3-cell-middle w3-mobile w3-center" style="width:85px">
+            <img src="@Model.AvatarUrl" class="w3-image" style="min-width:85px" alt="Image">
+        </div>
+    }
+    <div class="w3-container w3-cell w3-cell-middle w3-mobile w3-center">
+        <span class="w3-xlarge">@Model.Title</span>
+    </div>
+    <div class="w3-container w3-cell w3-cell-middle w3-mobile" style="width:200px">
+        <ButtonComponent Click="@(() => Nav.NavigateTo(Model.ViewUrl))" Text="Просмотреть" Color="blue" />
+    </div>
+</li>
+
+@code
+{
+    [Parameter]
+    public AvatarItemModel Model { get; set; }
+}

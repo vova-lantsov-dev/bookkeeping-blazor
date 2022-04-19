@@ -1,0 +1,14 @@
+﻿<label>@Label</label>
+<input class="w3-input" type="text" value="@Value" onchange="@OnChange" oninput="(this.dispatchEvent(new CustomEvent('change', {bubbles: true})))"  />
+
+@code
+{
+    [Parameter]
+    public string Label { get; set; }
+
+    [Parameter]
+    public string Value { get; set; }
+
+    [Parameter]
+    public Action<ChangeEventArgs> OnChange { get; set; }
+}

@@ -1,0 +1,17 @@
+@if (Models.Count == 0)
+{
+    <p>@Message</p>
+}
+else
+{
+    <AvatarList Models="@Models" />
+}
+
+@code
+{
+    [Parameter]
+    public ICollection<AvatarItemModel> Models { get; set; }
+    
+    [Parameter]
+    public string Message { get; set; }
+}

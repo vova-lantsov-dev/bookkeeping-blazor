@@ -1,0 +1,53 @@
+﻿@page "/child/{Id:int?}"
+@inject IDbContextFactory<BookkeepingContext> DbFactory
+@attribute [Authorize]
+
+<RedirectLoadingAction CheckIfNullObject="ChildObject"
+                       IsOk="IsOk"
+                       Message="Не удалось найти ребёнка по указанному идентификатору"
+                       RedirectUrl="/children">
+    <Avatar AvatarUrl="@(ChildObject!.ImageUrl)" />
+    <ChildComponent EditChildren="@Current.Permissions.EditChildren"
+                    ReadGlobalStatistics="@Current.Permissions.ReadGlobalStatistic"
+                    Child="@ChildObject" />
+</RedirectLoadingAction>
+
+@code
+{
+    Data.Models.Child? ChildObject { get; set; }
+    Data.Models.Teacher Current { get; set; }
+    bool IsOk { get; set; } = true;
+
+    [Parameter]
+    public int? Id { get; set; }
+    
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState auth = await AuthenticationStateTask;
+        Claim claim = auth.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier);
+
+        await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
+
+        try
+        {
+            Current = await context.Teachers
+                .AsNoTracking()
+                .Include(t => t.Permissions)
+                .FirstAsync(t => t.Id == int.Parse(claim.Value));
+
+            if (Id != null)
+            {
+                ChildObject = await context.Children
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == Id.Value) ?? new Data.Models.Child();
+            }
+        }
+        catch
+        {
+            IsOk = false;
+        }
+    }
+}
