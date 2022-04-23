@@ -18,72 +18,75 @@
             <span class="w3-large w3-bar-item">Консультация</span>
             <div class="w3-bar-item w3-center">
                 <label class="switch">
-                    @if (EditSubjects)
+                    @if (EditSubjects && Subject != null)
                     {
                         <input type="checkbox" @bind="Subject.IsConsultation" @bind:onchange="@(async () => { await SetConsultationAsync(); })" />
                     }
                     else
                     {
-                        <input type="checkbox" value="@Subject.IsConsultation" disabled />
+                        <input type="checkbox" value="@(Subject?.IsConsultation ?? false)" disabled />
                     }
                     <span class="slider round"></span>
                 </label>
             </div>
         </header>
 
-        <div class="w3-container">
-            @{
-                var childrenToDisplay = !AddingChildren
-                    ? Subject.ChildrenReference.Select(@ref => @ref.Child).ToArray()
-                    : AllChildren.Where(c => !Subject.ChildrenReference.Exists(sc => sc.ChildId == c.Id)).ToArray();
-                for (var childOffset = 0;; childOffset++)
-                {
-                    var childrenRow = childrenToDisplay.Skip(childOffset * 3).Take(3).ToList();
-                    if (childrenRow.Count == 0)
+        @if (Subject != null)
+        {
+            <div class="w3-container">
+                @{
+                    var childrenToDisplay = !AddingChildren
+                        ? Subject.ChildrenReference.Select(@ref => @ref.Child).ToArray()
+                        : AllChildren.Where(c => !Subject.ChildrenReference.Exists(sc => sc.ChildId == c.Id)).ToArray();
+                    for (var childOffset = 0;; childOffset++)
                     {
-                        break;
-                    }
-
-                    <div class="w3-row w3-padding-small">
-                        @foreach (Child child in childrenRow)
+                        var childrenRow = childrenToDisplay.Skip(childOffset * 3).Take(3).ToList();
+                        if (childrenRow.Count == 0)
                         {
-                            <div class="w3-third w3-mobile w3-padding-small">
-                                <div class="w3-center w3-card-4 w3-round">
-                                    @if (EditSubjects)
-                                    {
-                                        <div class="w3-display-container w3-hover-opacity">
-                                            <img class="w3-image" style="max-width:300px" alt="Фото для @child.FirstName @child.LastName" src="@child.ImageUrl"/>
-                                            <div class="w3-display-middle w3-display-hover">
-                                                @if (AddingChildren)
-                                                {
-                                                    <button class="w3-button w3-green w3-hover-text-green w3-border w3-border-green w3-hover-white" onclick="@(async () => await AddChildAsync(child))">Добавить</button>
-                                                }
-                                                else
-                                                {
-                                                    <button class="w3-button w3-red w3-hover-text-red w3-border w3-border-red w3-hover-white" onclick="@(async () => await DeleteChildAsync(child))">Удалить</button>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <img class="w3-image" style="max-width:300px" alt="Фото для @child.FirstName @child.LastName" src="@child.ImageUrl"/>
-                                    }
-                                    <span class="w3-large">
-                                        @(string.Join(' ', new[] { child.LastName, child.FirstName, child.Patronymic }.Where(it => !string.IsNullOrEmpty(it))))
-                                    </span>
-                                </div>
-                            </div>
+                            break;
                         }
-                    </div>
 
-                    if (childrenRow.Count < 3)
-                    {
-                        break;
+                        <div class="w3-row w3-padding-small">
+                            @foreach (Child child in childrenRow)
+                            {
+                                <div class="w3-third w3-mobile w3-padding-small">
+                                    <div class="w3-center w3-card-4 w3-round">
+                                        @if (EditSubjects)
+                                        {
+                                            <div class="w3-display-container w3-hover-opacity">
+                                                <img class="w3-image" style="max-width:300px" alt="Фото для @child.FirstName @child.LastName" src="@child.ImageUrl"/>
+                                                <div class="w3-display-middle w3-display-hover">
+                                                    @if (AddingChildren)
+                                                    {
+                                                        <button class="w3-button w3-green w3-hover-text-green w3-border w3-border-green w3-hover-white" onclick="@(async () => await AddChildAsync(child))">Добавить</button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="w3-button w3-red w3-hover-text-red w3-border w3-border-red w3-hover-white" onclick="@(async () => await DeleteChildAsync(child))">Удалить</button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <img class="w3-image" style="max-width:300px" alt="Фото для @child.FirstName @child.LastName" src="@child.ImageUrl"/>
+                                        }
+                                        <span class="w3-large">
+                                            @(string.Join(' ', new[] { child.LastName, child.FirstName, child.Patronymic }.Where(it => !string.IsNullOrEmpty(it))))
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        if (childrenRow.Count < 3)
+                        {
+                            break;
+                        }
                     }
                 }
-            }
-        </div>
+            </div>
+        }
 
         <footer class="w3-teal w3-padding-small">
         </footer>
@@ -94,7 +97,7 @@
 {
     bool AddingChildren { get; set; }
     bool Opened { get; set; }
-    Subject Subject { get; set; }
+    Subject? Subject { get; set; }
     
     [Parameter]
     public bool EditSubjects { get; set; }
@@ -105,7 +108,7 @@
     async Task DeleteChildAsync(Child child)
     {
         await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
-        Subject__Child @ref = Subject.ChildrenReference.Find(@ref => @ref.ChildId == child.Id && @ref.SubjectId == Subject.Id)!;
+        Subject__Child @ref = Subject!.ChildrenReference.Find(@ref => @ref.ChildId == child.Id && @ref.SubjectId == Subject.Id)!;
         context.SubjectsChildrenReference.Remove(@ref);
         await context.SaveChangesAsync();
 
@@ -125,7 +128,7 @@
     async Task SetConsultationAsync()
     {
         await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
-        context.Subjects.Attach(Subject).Property(s => s.IsConsultation).IsModified = true;
+        context.Subjects.Attach(Subject!).Property(s => s.IsConsultation).IsModified = true;
         await context.SaveChangesAsync();
     }
 
@@ -138,10 +141,12 @@
     public void Open()
     {
         Opened = true;
+        StateHasChanged();
     }
 
-    public void SetSubject(Subject subject)
+    public void SetSubject(Subject? subject)
     {
-        Subject = subject;
+        Subject = subject ??
+                  new Subject {ChildrenReference = new List<Subject__Child>()};
     }
 }

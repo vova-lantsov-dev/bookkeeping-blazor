@@ -1,14 +1,14 @@
 ﻿<div class="w3-padding-small w3-block">
     <label class="w3-large">Выберите дату:</label>
-    <input class="w3-input w3-large" type="date" @bind="Date" @bind:format="d-M-yyyy" />
+    <input class="w3-input w3-large" type="date" @bind="Date" @bind:format="yyyy-MM-dd" />
     <button class="w3-large w3-button" onclick="@(() => OnChange(Date))">Обновить данные</button>
 </div>
 
 @code
 {
     [Parameter]
-    public DateOnly Date { get; set; }
+    public DateTime Date { get; set; }
 
     [Parameter]
-    public Action<DateOnly> OnChange { get; set; }
+    public Action<DateTime> OnChange { get; set; }
 }

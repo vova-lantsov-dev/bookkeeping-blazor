@@ -1,4 +1,5 @@
 ﻿@page "/teacher/{Id:int?}"
+@using Bookkeeping.Data.Models
 @inject IDbContextFactory<BookkeepingContext> DbFactory
 @attribute [Authorize]
 
@@ -27,7 +28,7 @@
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState auth = await AuthenticationStateTask;
-        Claim claim = auth.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier);
+        Claim claim = auth.User.Claims.First(c => c.Type == CustomClaimTypes.TeacherId);
 
         await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
 
@@ -42,7 +43,12 @@
             {
                 TeacherObject = await context.Teachers
                     .AsNoTracking()
+                    .Include(t => t.Permissions)
                     .FirstOrDefaultAsync(c => c.Id == Id.Value) ?? new Data.Models.Teacher();
+            }
+            else
+            {
+                TeacherObject = new Data.Models.Teacher {Permissions = new TeacherPermissions()};
             }
         }
         catch

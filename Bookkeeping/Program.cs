@@ -1,5 +1,7 @@
 using Bookkeeping.Auth;
 using Bookkeeping.Data;
+using Bookkeeping.Data.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,8 +22,11 @@ builder.Services
     {
         opts.Password.RequiredLength = 8;
         opts.Password.RequiredUniqueChars = 4;
+        opts.Password.RequireNonAlphanumeric = false;
     })
     .AddEntityFrameworkStores<AuthContext>();
+
+builder.Services.AddTransient<IClaimsTransformation, TeacherClaimsTransformation>();
 
 builder.Services.AddDbContext<AuthContext>(opts =>
 {
@@ -51,9 +56,42 @@ WebApplication app = builder.Build();
 
 await using (AsyncServiceScope scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope())
 {
-    var signInManager = scope.ServiceProvider.GetRequiredService<UserManager<TeacherIdentityUser>>();
-    await signInManager.CreateAsync(new TeacherIdentityUser { Email = "admin@admin", UserName = "admin" },
-        "My_Super_Password_12345");
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<TeacherIdentityUser>>();
+    var bookkeepingContext = scope.ServiceProvider.GetRequiredService<BookkeepingContext>();
+
+    if (await userManager.FindByNameAsync("admin") == null)
+    {
+        IdentityResult? result = await userManager.CreateAsync(new TeacherIdentityUser { Email = "admin@admin", UserName = "admin" },
+            "Password12345");
+        if (result is not { Succeeded: true })
+        {
+            throw new Exception();
+        }
+    }
+
+    if (!await bookkeepingContext.Teachers.AnyAsync())
+    {
+        bookkeepingContext.Teachers.Add(new Teacher
+        {
+            Email = "admin@admin",
+            FirstName = "admin",
+            LastName = "",
+            Patronymic = "",
+            PerHour = 0M,
+            PerHourGroup = 0M,
+            Permissions = new TeacherPermissions
+            {
+                EditChildren = true,
+                EditSubjects = true,
+                EditTeachers = true,
+                IsOwner = true,
+                ReadGlobalStatistic = true
+            },
+            PhoneNumber = "",
+            AuthUserName = "admin"
+        });
+        await bookkeepingContext.SaveChangesAsync();
+    }
 }
 
 app.UseStaticFiles();

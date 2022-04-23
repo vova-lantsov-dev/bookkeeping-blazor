@@ -27,6 +27,9 @@ public class Teacher
     public string? Additional { get; set; }
     [Column("image_url")]
     public string? ImageUrl { get; set; }
+    
+    [Column("teacher_auth_id")]
+    public string AuthUserName { get; set; }
         
     [ForeignKey(nameof(Id))]
     public TeacherPermissions Permissions { get; set; }

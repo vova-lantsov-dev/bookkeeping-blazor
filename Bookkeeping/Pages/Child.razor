@@ -27,7 +27,7 @@
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState auth = await AuthenticationStateTask;
-        Claim claim = auth.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier);
+        Claim claim = auth.User.Claims.First(c => c.Type == CustomClaimTypes.TeacherId);
 
         await using BookkeepingContext context = await DbFactory.CreateDbContextAsync();
 
@@ -43,6 +43,10 @@
                 ChildObject = await context.Children
                     .AsNoTracking()
                     .FirstOrDefaultAsync(c => c.Id == Id.Value) ?? new Data.Models.Child();
+            }
+            else
+            {
+                ChildObject = new Data.Models.Child();
             }
         }
         catch
